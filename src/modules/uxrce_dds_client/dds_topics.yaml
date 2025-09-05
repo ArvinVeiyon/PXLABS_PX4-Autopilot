@@ -8,6 +8,9 @@ publications:
   - topic: /fmu/out/register_ext_component_reply
     type: px4_msgs::msg::RegisterExtComponentReply
 
+  - topic: /fmu/out/input_rc
+    type: px4_msgs::msg::InputRc
+
   - topic: /fmu/out/arming_check_request
     type: px4_msgs::msg::ArmingCheckRequest
 
@@ -81,7 +84,11 @@ publications:
     type: px4_msgs::msg::HomePosition
 
 # Create uORB::Publication
-subscriptions:
+subscriptions: 
+
+  - topic: /fmu/in/arming_check_request
+    type: px4_msgs::msg::ArmingCheckRequest
+
   - topic: /fmu/in/register_ext_component_request
     type: px4_msgs::msg::RegisterExtComponentRequest
 

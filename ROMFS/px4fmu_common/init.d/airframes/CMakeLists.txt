@@ -161,6 +161,7 @@ endif()
 if(CONFIG_MODULES_ROVER_POS_CONTROL)
 	px4_add_romfs_files(
 		# [59000, 59999] Rover position control (deprecated)
+   		#51000_generic_rover_ackermann
 		59000_generic_ground_vehicle
 		59001_nxpcup_car_dfrobot_gpx
 	)
