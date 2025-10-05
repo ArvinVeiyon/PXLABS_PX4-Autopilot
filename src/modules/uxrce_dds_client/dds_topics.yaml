@@ -83,8 +83,24 @@ publications:
   - topic: /fmu/out/home_position
     type: px4_msgs::msg::HomePosition
 
+  # - topic: /fmu/out/rover_position_setpoint
+  #    type: px4_msgs::msg::RoverPositionSetpoint
+
+  # - topic: /fmu/out/rover_attitude_setpoint
+  #   type: px4_msgs::msg::RoverAttitudeSetpoint
+
+  # - topic: /fmu/out/rover_rate_setpoint
+  #   type: px4_msgs::msg::RoverRateSetpoint
+
+  - topic: /fmu/out/rover_throttle_setpoint
+    type: px4_msgs::msg::RoverThrottleSetpoint
+
+  - topic: /fmu/out/rover_steering_setpoint
+    type: px4_msgs::msg::RoverSteeringSetpoint
+
+
 # Create uORB::Publication
-subscriptions: 
+subscriptions:
 
   - topic: /fmu/in/arming_check_request
     type: px4_msgs::msg::ArmingCheckRequest
@@ -169,6 +185,22 @@ subscriptions:
 
   - topic: /fmu/in/aux_global_position
     type: px4_msgs::msg::VehicleGlobalPosition
+
+  - topic: /fmu/in/rover_position_setpoint
+    type: px4_msgs::msg::RoverPositionSetpoint
+
+  - topic: /fmu/in/rover_attitude_setpoint
+    type: px4_msgs::msg::RoverAttitudeSetpoint
+
+  - topic: /fmu/in/rover_rate_setpoint
+    type: px4_msgs::msg::RoverRateSetpoint
+
+  - topic: /fmu/in/rover_throttle_setpoint
+    type: px4_msgs::msg::RoverThrottleSetpoint
+
+  - topic: /fmu/in/rover_steering_setpoint
+    type: px4_msgs::msg::RoverSteeringSetpoint
+
 
 # Create uORB::PublicationMulti
 subscriptions_multi:
