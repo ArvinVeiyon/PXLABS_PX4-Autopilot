@@ -143,32 +143,34 @@ void AckermannVelControl::generateAttitudeAndThrottleSetpoint()
 		_ackermann_velocity_setpoint_sub.copy(&_ackermann_velocity_setpoint);
 	}
 
-	// Attitude Setpoint
-	if (fabsf(_ackermann_velocity_setpoint.velocity_ned[1]) < FLT_EPSILON
-	    && fabsf(_ackermann_velocity_setpoint.velocity_ned[0]) < FLT_EPSILON) {
-		rover_attitude_setpoint_s rover_attitude_setpoint{};
-		rover_attitude_setpoint.timestamp = _timestamp;
-		rover_attitude_setpoint.yaw_setpoint = _vehicle_yaw;
-		_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
-
-	} else {
-		rover_attitude_setpoint_s rover_attitude_setpoint{};
-		rover_attitude_setpoint.timestamp = _timestamp;
-		const float yaw_setpoint = atan2f(_ackermann_velocity_setpoint.velocity_ned[1],
-						  _ackermann_velocity_setpoint.velocity_ned[0]);
-		rover_attitude_setpoint.yaw_setpoint = _ackermann_velocity_setpoint.backwards ? matrix::wrap_pi(
-				yaw_setpoint + M_PI_F) : yaw_setpoint;
-		_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
-	}
-
 	// Throttle Setpoint
 	float speed_magnitude = math::min(sqrtf(powf(_ackermann_velocity_setpoint.velocity_ned[0],
 					  2) + powf(_ackermann_velocity_setpoint.velocity_ned[1], 2)), _param_ro_speed_limit.get());
 
-	// Apply collision prevention to speed setpoint
+	// Desired yaw setpoint
+	float yaw_setpoint = _vehicle_yaw;
+
+	if (!(fabsf(_ackermann_velocity_setpoint.velocity_ned[1]) < FLT_EPSILON
+	      && fabsf(_ackermann_velocity_setpoint.velocity_ned[0]) < FLT_EPSILON)) {
+		const float desired_yaw = atan2f(_ackermann_velocity_setpoint.velocity_ned[1],
+						 _ackermann_velocity_setpoint.velocity_ned[0]);
+		yaw_setpoint = _ackermann_velocity_setpoint.backwards ? matrix::wrap_pi(desired_yaw + M_PI_F) : desired_yaw;
+	}
+
+	// Apply collision prevention to speed and yaw setpoints
 	if (_collision_prevention.isActive()) {
 		speed_magnitude = _collision_prevention.modifySpeedSetpoint(speed_magnitude, _vehicle_yaw);
+
+		if (speed_magnitude > 0.f) {
+			yaw_setpoint = _collision_prevention.modifyYawSetpoint(yaw_setpoint, _vehicle_yaw);
+		}
 	}
+
+	// Attitude Setpoint
+	rover_attitude_setpoint_s rover_attitude_setpoint{};
+	rover_attitude_setpoint.timestamp = _timestamp;
+	rover_attitude_setpoint.yaw_setpoint = yaw_setpoint;
+	_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
 
 	const float speed_body_x_setpoint = _ackermann_velocity_setpoint.backwards ? -speed_magnitude : speed_magnitude;
 	rover_throttle_setpoint_s rover_throttle_setpoint{};

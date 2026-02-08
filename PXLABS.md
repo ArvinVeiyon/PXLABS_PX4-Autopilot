@@ -239,26 +239,22 @@ For questions and support related to PXLABS modifications, please open an issue 
 
 #### Pending Work (TODO)
 
-1. **Change to use standard CP_* parameters** instead of RCP_*
-   - Modify `src/lib/collision_prevention/collisionprevention_params.c`
-   - Change `@group Multicopter Position Control` to `@group Collision Prevention`
-   - Update rover code to use CP_DIST, CP_DELAY, CP_GUIDE_ANG, CP_GO_NO_DATA
-   - Remove separate RCP_* parameters
+None at this time.
 
-2. **Add missing features to match drone implementation:**
-   - `CP_DELAY` - Delay compensation for sensors
-   - `CP_GUIDE_ANG` - Guidance angle to navigate around obstacles
-   - Publish `obstacle_distance_fused` for logging/debugging
-   - HOLD mode timeout after 5s without sensor data
+#### Codex CLI Suggestions (PX4 Collision Prevention Parity)
 
-#### Current Parameters (to be changed to CP_*)
+- Distance sensor FOV handling: currently each distance sensor contributes to a single bin; PX4 standard behavior spreads readings across the sensor `h_fov` bins. Consider updating rover collision prevention to fill bins across FOV.
+- Delay compensation semantics: current rover logic uses `CP_DELAY` with a simple distance reduction based on speed; PX4 multicopter collision prevention models delay in its kinematic constraints. Consider aligning rover delay compensation more closely.
+- Config migration: existing rover configs that relied on `RCP_GO_NO_DATA=1` should be reviewed now that `CP_GO_NO_DATA=0` is the default.
+
+#### Current Parameters (CP_*)
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
-| `RCP_DIST` | -1 (disabled) | Minimum distance to obstacles. Set > 0 to enable |
-| `RCP_SLOW_DIST` | 5.0 m | Distance to start slowing down |
-| `RCP_MIN_SPEED` | 0.3 m/s | Minimum speed when obstacle detected |
-| `RCP_GO_NO_DATA` | 1 (enabled) | Allow movement without sensor data |
+| `CP_DIST` | -1 (disabled) | Minimum distance to obstacles. Set > 0 to enable |
+| `CP_DELAY` | 0.4 s | Sensor delay compensation |
+| `CP_GUIDE_ANG` | 30 deg | Guidance angle to steer around obstacles |
+| `CP_GO_NO_DATA` | 0 (disabled) | Allow movement without sensor data |
 
 #### Resume Instructions
 

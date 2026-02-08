@@ -47,7 +47,7 @@
  * @min -1
  * @max 15
  * @unit m
- * @group Multicopter Position Control
+ * @group Collision Prevention
  */
 PARAM_DEFINE_FLOAT(CP_DIST, -1.0f);
 
@@ -59,7 +59,7 @@ PARAM_DEFINE_FLOAT(CP_DIST, -1.0f);
  * @min 0
  * @max 1
  * @unit s
- * @group Multicopter Position Control
+ * @group Collision Prevention
  */
 PARAM_DEFINE_FLOAT(CP_DELAY, 0.4f);
 
@@ -71,7 +71,7 @@ PARAM_DEFINE_FLOAT(CP_DELAY, 0.4f);
  * @min 0
  * @max 90
  * @unit deg
- * @group Multicopter Position Control
+ * @group Collision Prevention
  */
 PARAM_DEFINE_FLOAT(CP_GUIDE_ANG, 30.f);
 
@@ -81,6 +81,6 @@ PARAM_DEFINE_FLOAT(CP_GUIDE_ANG, 30.f);
  * Only used in Position mode.
  *
  * @boolean
- * @group Multicopter Position Control
+ * @group Collision Prevention
  */
 PARAM_DEFINE_INT32(CP_GO_NO_DATA, 0);

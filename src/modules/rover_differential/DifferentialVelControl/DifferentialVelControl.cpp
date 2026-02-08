@@ -139,14 +139,10 @@ void DifferentialVelControl::generateAttitudeAndThrottleSetpoint()
 		_differential_velocity_setpoint_sub.copy(&_differential_velocity_setpoint);
 	}
 
-	// Attitude Setpoint
-	rover_attitude_setpoint_s rover_attitude_setpoint{};
-	rover_attitude_setpoint.timestamp = _timestamp;
-	rover_attitude_setpoint.yaw_setpoint = _differential_velocity_setpoint.bearing;
-	_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
+	float bearing = _differential_velocity_setpoint.bearing;
 
 	// Throttle Setpoint
-	const float heading_error = matrix::wrap_pi(_differential_velocity_setpoint.bearing - _vehicle_yaw);
+	float heading_error = matrix::wrap_pi(bearing - _vehicle_yaw);
 
 	if (_current_state == DrivingState::DRIVING && fabsf(heading_error) > _param_rd_trans_drv_trn.get()) {
 		_current_state = DrivingState::SPOT_TURNING;
@@ -164,6 +160,11 @@ void DifferentialVelControl::generateAttitudeAndThrottleSetpoint()
 		// Apply collision prevention to speed setpoint
 		if (_collision_prevention.isActive() && speed_body_x_setpoint > 0.f) {
 			speed_body_x_setpoint = _collision_prevention.modifySpeedSetpoint(speed_body_x_setpoint, _vehicle_yaw);
+
+			if (speed_body_x_setpoint > 0.f) {
+				bearing = _collision_prevention.modifyYawSetpoint(bearing, _vehicle_yaw);
+				heading_error = matrix::wrap_pi(bearing - _vehicle_yaw);
+			}
 		}
 
 		const float speed_body_x_setpoint_normalized = math::interpolate<float>(speed_body_x_setpoint,
@@ -188,6 +189,12 @@ void DifferentialVelControl::generateAttitudeAndThrottleSetpoint()
 			_param_ro_max_thr_speed.get(), _dt);
 	rover_throttle_setpoint.throttle_body_y = 0.f;
 	_rover_throttle_setpoint_pub.publish(rover_throttle_setpoint);
+
+	// Attitude Setpoint
+	rover_attitude_setpoint_s rover_attitude_setpoint{};
+	rover_attitude_setpoint.timestamp = _timestamp;
+	rover_attitude_setpoint.yaw_setpoint = bearing;
+	_rover_attitude_setpoint_pub.publish(rover_attitude_setpoint);
 
 }
 
