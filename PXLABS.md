@@ -216,6 +216,61 @@ This project inherits the BSD 3-Clause License from PX4-Autopilot.
 
 For questions and support related to PXLABS modifications, please open an issue in this repository.
 
+## Development Branch (pxlabs-v1.16.0-dev)
+
+### Rover Collision Prevention - IN PROGRESS
+
+**Status:** Partially implemented, needs update to use standard CP_* parameters
+
+#### Completed Work
+
+1. **Created RoverCollisionPrevention library** (`src/lib/rover_collision_prevention/`)
+   - `RoverCollisionPrevention.hpp` - Header file
+   - `RoverCollisionPrevention.cpp` - Implementation
+   - `rover_collision_prevention_params.c` - Parameters (currently RCP_*)
+   - `CMakeLists.txt` - Build configuration
+
+2. **Integrated into all rover modules:**
+   - Rover Ackermann (`AckermannVelControl`)
+   - Rover Differential (`DifferentialVelControl`)
+   - Rover Mecanum (`MecanumPosVelControl`)
+
+3. **Build tested successfully** for px4_fmu-v6xrt_default
+
+#### Pending Work (TODO)
+
+1. **Change to use standard CP_* parameters** instead of RCP_*
+   - Modify `src/lib/collision_prevention/collisionprevention_params.c`
+   - Change `@group Multicopter Position Control` to `@group Collision Prevention`
+   - Update rover code to use CP_DIST, CP_DELAY, CP_GUIDE_ANG, CP_GO_NO_DATA
+   - Remove separate RCP_* parameters
+
+2. **Add missing features to match drone implementation:**
+   - `CP_DELAY` - Delay compensation for sensors
+   - `CP_GUIDE_ANG` - Guidance angle to navigate around obstacles
+   - Publish `obstacle_distance_fused` for logging/debugging
+   - HOLD mode timeout after 5s without sensor data
+
+#### Current Parameters (to be changed to CP_*)
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `RCP_DIST` | -1 (disabled) | Minimum distance to obstacles. Set > 0 to enable |
+| `RCP_SLOW_DIST` | 5.0 m | Distance to start slowing down |
+| `RCP_MIN_SPEED` | 0.3 m/s | Minimum speed when obstacle detected |
+| `RCP_GO_NO_DATA` | 1 (enabled) | Allow movement without sensor data |
+
+#### Resume Instructions
+
+To continue this work:
+1. Checkout dev branch: `git checkout pxlabs-v1.16.0-dev`
+2. Modify collision prevention params to use generic group
+3. Update rover code to use CP_* parameters
+4. Add missing features (delay, guidance, fused publish, timeout)
+5. Test build and commit
+
+---
+
 ## Changelog
 
 ### pxlabs-v1.16.0-r1 (Initial Release)
