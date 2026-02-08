@@ -88,6 +88,17 @@ make px4_fmu-v6xrt_bootloader
 
 > **Note:** A pre-compiled working bootloader (`px4_fmu-v6xrt_bootloader.bin`) compiled with GCC 9.3.1 is available. Contact PXLABS for access if needed.
 
+## Setup Procedure Documents
+
+Important setup and configuration guides for NXP FMU-V6XRT:
+
+| Document | Description |
+|----------|-------------|
+| [Bootloader Update Guide](docs/Bootloader%20Update%20Pixhawk%20V6X-RT%20via%20USB%20_%20PX4%20Guide%20(main).pdf) | Step-by-step guide for updating bootloader via USB |
+| [Burning Fuses on RT7](docs/Burning%20fuses%20on%20RT7.pdf) | Fuse configuration procedure for RT7 |
+
+> **Important:** Review these documents before performing hardware setup or bootloader updates.
+
 ### Clone Repository
 
 ```bash
