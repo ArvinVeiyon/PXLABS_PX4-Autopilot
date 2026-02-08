@@ -42,6 +42,7 @@
 
 #pragma once
 
+#include <commander/px4_custom_mode.h>
 #include <drivers/drv_hrt.h>
 #include <mathlib/mathlib.h>
 #include <matrix/matrix/math.hpp>
@@ -54,6 +55,7 @@
 #include <uORB/topics/distance_sensor.h>
 #include <uORB/topics/obstacle_distance.h>
 #include <uORB/topics/vehicle_attitude.h>
+#include <uORB/topics/vehicle_command.h>
 
 using namespace time_literals;
 
@@ -76,6 +78,14 @@ public:
 	 * @return Modified speed setpoint [m/s]
 	 */
 	float modifySpeedSetpoint(float speed_setpoint, float vehicle_yaw);
+
+	/**
+	 * Modify the yaw setpoint to guide around obstacles.
+	 * @param desired_yaw Desired yaw setpoint [rad]
+	 * @param vehicle_yaw Current vehicle yaw [rad]
+	 * @return Modified yaw setpoint [rad]
+	 */
+	float modifyYawSetpoint(float desired_yaw, float vehicle_yaw);
 
 	/**
 	 * Get the minimum distance to obstacle in front of the rover
@@ -107,7 +117,14 @@ private:
 	 * @param obstacle_distance Distance to obstacle [m]
 	 * @return Speed limit factor [0, 1]
 	 */
-	float _calculateSpeedLimit(float obstacle_distance);
+	float _calculateSpeedLimit(float obstacle_distance, float speed_setpoint);
+
+	/**
+	 * Select a guided direction in body frame within CP_GUIDE_ANG.
+	 * @param desired_direction_rad Desired direction in body frame [rad]
+	 * @return Guided direction in body frame [rad]
+	 */
+	float _selectGuidedDirection(float desired_direction_rad);
 
 	/**
 	 * Add distance sensor data to obstacle map
@@ -131,9 +148,12 @@ private:
 	bool _data_stale{true};
 	bool _obstacle_data_present{false};
 	float _closest_distance_front{FLT_MAX};
+	uint64_t _closest_distance_front_timestamp{0};
+	hrt_abstime _last_data_time{0};
 
 	hrt_abstime _last_update{0};
 	static constexpr uint64_t DATA_TIMEOUT_US{500_ms};
+	static constexpr uint64_t TIMEOUT_HOLD_US{5_s};
 
 	orb_advert_t _mavlink_log_pub{nullptr};
 
@@ -144,12 +164,24 @@ private:
 
 	// Publications
 	uORB::Publication<collision_constraints_s> _constraints_pub{ORB_ID(collision_constraints)};
+	uORB::Publication<obstacle_distance_s> _obstacle_distance_fused_pub{ORB_ID(obstacle_distance_fused)};
+	uORB::Publication<vehicle_command_s> _vehicle_command_pub{ORB_ID(vehicle_command)};
+
+	// State for no-data handling
+	hrt_abstime _last_timeout_warning{0};
+	hrt_abstime _time_activated{0};
+	bool _was_active{false};
 
 	// Parameters
 	DEFINE_PARAMETERS(
-		(ParamFloat<px4::params::RCP_DIST>) _param_rcp_dist,          /**< Minimum distance to keep from obstacles */
-		(ParamFloat<px4::params::RCP_SLOW_DIST>) _param_rcp_slow_dist, /**< Distance at which to start slowing down */
-		(ParamFloat<px4::params::RCP_MIN_SPEED>) _param_rcp_min_speed,  /**< Minimum speed when obstacle detected */
-		(ParamInt<px4::params::RCP_GO_NO_DATA>) _param_rcp_go_no_data   /**< Allow movement where no sensor data */
+		(ParamFloat<px4::params::CP_DIST>) _param_cp_dist,            /**< Minimum distance to keep from obstacles */
+		(ParamFloat<px4::params::CP_DELAY>) _param_cp_delay,          /**< Delay compensation for sensors */
+		(ParamFloat<px4::params::CP_GUIDE_ANG>) _param_cp_guide_ang,  /**< Guidance angle to steer around obstacles */
+		(ParamBool<px4::params::CP_GO_NO_DATA>) _param_cp_go_no_data  /**< Allow movement where no sensor data */
 	)
+
+	/**
+	 * Publishes vehicle command to hold/loiter.
+	 */
+	void _publishVehicleCmdDoLoiter();
 };
