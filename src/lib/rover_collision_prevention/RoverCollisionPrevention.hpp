@@ -117,7 +117,7 @@ private:
 	 * @param obstacle_distance Distance to obstacle [m]
 	 * @return Speed limit factor [0, 1]
 	 */
-	float _calculateSpeedLimit(float obstacle_distance, float speed_setpoint);
+	float _calculateSpeedLimit(float obstacle_distance, float speed_setpoint, float data_age_s);
 
 	/**
 	 * Select a guided direction in body frame within CP_GUIDE_ANG.
@@ -129,7 +129,7 @@ private:
 	/**
 	 * Add distance sensor data to obstacle map
 	 */
-	void _addDistanceSensorData(const distance_sensor_s &distance_sensor, float vehicle_yaw);
+	void _addDistanceSensorData(const distance_sensor_s &distance_sensor);
 
 	/**
 	 * Add obstacle distance message data to obstacle map
@@ -144,9 +144,12 @@ private:
 	uint16_t _obstacle_distances[BIN_COUNT] {};  // in cm
 	uint64_t _data_timestamps[BIN_COUNT] {};
 	uint16_t _data_maxranges[BIN_COUNT] {};  // in cm
+	uint8_t _data_fov[BIN_COUNT] {};  // bin has been covered by any sensor/FOV
 
 	bool _data_stale{true};
-	bool _obstacle_data_present{false};
+	bool _any_obstacle_data_present{false};
+	bool _front_obstacle_data_present{false};
+	bool _front_data_timed_out_in_fov{false};
 	float _closest_distance_front{FLT_MAX};
 	uint64_t _closest_distance_front_timestamp{0};
 	hrt_abstime _last_data_time{0};
