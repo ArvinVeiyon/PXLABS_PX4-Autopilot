@@ -99,6 +99,18 @@ All PXLABS-specific resources are located in the `pxlabs/` folder.
 
 > **Recommendation:** Use the NXP bootloader if you experience boot failures. The PXLabs bootloader includes additional build artifacts (.elf, .map, .px4) for debugging.
 
+### Pre-compiled Firmware
+
+| Firmware | Path | Description |
+|----------|------|-------------|
+| **PXLabs Firmware** | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` | FMU-V6XRT firmware with rover modifications |
+
+Build artifacts included:
+- `px4_fmu-v6xrt_default.bin` - Binary firmware file
+- `px4_fmu-v6xrt_default.px4` - PX4 firmware package
+- `px4_fmu-v6xrt_default.elf` - ELF file for debugging
+- `px4_fmu-v6xrt_default.map` - Memory map file
+
 ### Setup Procedure Documents
 
 Important setup and configuration guides for NXP FMU-V6XRT:
