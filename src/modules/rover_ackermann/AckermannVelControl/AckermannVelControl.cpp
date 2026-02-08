@@ -162,8 +162,14 @@ void AckermannVelControl::generateAttitudeAndThrottleSetpoint()
 	}
 
 	// Throttle Setpoint
-	const float speed_magnitude = math::min(sqrtf(powf(_ackermann_velocity_setpoint.velocity_ned[0],
-						2) + powf(_ackermann_velocity_setpoint.velocity_ned[1], 2)), _param_ro_speed_limit.get());
+	float speed_magnitude = math::min(sqrtf(powf(_ackermann_velocity_setpoint.velocity_ned[0],
+					  2) + powf(_ackermann_velocity_setpoint.velocity_ned[1], 2)), _param_ro_speed_limit.get());
+
+	// Apply collision prevention to speed setpoint
+	if (_collision_prevention.isActive()) {
+		speed_magnitude = _collision_prevention.modifySpeedSetpoint(speed_magnitude, _vehicle_yaw);
+	}
+
 	const float speed_body_x_setpoint = _ackermann_velocity_setpoint.backwards ? -speed_magnitude : speed_magnitude;
 	rover_throttle_setpoint_s rover_throttle_setpoint{};
 	rover_throttle_setpoint.timestamp = _timestamp;

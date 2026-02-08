@@ -49,6 +49,7 @@ px4_add_module(
 		AckermannPosControl
 		px4_work_queue
 		rover_control
+		rover_collision_prevention
 		pure_pursuit
 	MODULE_CONFIG
 		module.yaml

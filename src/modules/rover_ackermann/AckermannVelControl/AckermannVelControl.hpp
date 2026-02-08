@@ -39,6 +39,7 @@
 
 // Library includes
 #include <lib/rover_control/RoverControl.hpp>
+#include <lib/rover_collision_prevention/RoverCollisionPrevention.hpp>
 #include <lib/pid/PID.hpp>
 #include <matrix/matrix/math.hpp>
 #include <lib/slew_rate/SlewRate.hpp>
@@ -135,6 +136,9 @@ private:
 	// Controllers
 	PID _pid_speed;
 	SlewRate<float> _speed_setpoint;
+
+	// Collision Prevention
+	RoverCollisionPrevention _collision_prevention{this};
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::RO_MAX_THR_SPEED>) _param_ro_max_thr_speed,

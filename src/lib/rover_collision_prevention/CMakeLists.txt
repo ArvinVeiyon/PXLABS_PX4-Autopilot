@@ -31,26 +31,16 @@
 #
 ############################################################################
 
-add_subdirectory(DifferentialRateControl)
-add_subdirectory(DifferentialAttControl)
-add_subdirectory(DifferentialVelControl)
-add_subdirectory(DifferentialPosControl)
+px4_add_library(rover_collision_prevention
+	RoverCollisionPrevention.cpp
+)
 
-px4_add_module(
-	MODULE modules__rover_differential
-	MAIN rover_differential
-	SRCS
-		RoverDifferential.cpp
-		RoverDifferential.hpp
-	DEPENDS
-		DifferentialRateControl
-		DifferentialAttControl
-		DifferentialVelControl
-		DifferentialPosControl
-		px4_work_queue
-		rover_control
-		rover_collision_prevention
-		pure_pursuit
-	MODULE_CONFIG
-		module.yaml
+target_link_libraries(rover_collision_prevention
+	PUBLIC
+		mathlib
+)
+
+target_include_directories(rover_collision_prevention
+	PUBLIC
+		${CMAKE_CURRENT_SOURCE_DIR}
 )
