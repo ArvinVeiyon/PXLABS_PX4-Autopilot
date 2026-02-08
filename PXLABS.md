@@ -19,6 +19,7 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 |----------|-------|
 | Base Version | PX4 v1.16.0 |
 | Branch | pxlabs-v1.16.0-r1 |
+| Target Board | NXP FMU-V6XRT |
 | Upstream | https://github.com/PX4/PX4-Autopilot |
 | Maintainer | PXLABS |
 
@@ -106,13 +107,22 @@ bash ./Tools/setup/ubuntu.sh
 make px4_sitl_default
 ```
 
-### Build for Hardware
+### Build for Hardware (NXP FMU-V6XRT)
 
 ```bash
-# For Pixhawk 4
-make px4_fmu-v5_default
+# Build firmware for NXP FMU-V6XRT
+make px4_fmu-v6xrt_default
 
-# For other boards, check available targets
+# Build bootloader for NXP FMU-V6XRT
+make px4_fmu-v6xrt_bootloader
+
+# Clean build (if needed)
+make px4_fmu-v6xrt_default clean
+
+# Upload firmware via USB
+make px4_fmu-v6xrt_default upload
+
+# List all available targets
 make list_config_targets
 ```
 
