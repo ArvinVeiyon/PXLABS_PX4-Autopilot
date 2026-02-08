@@ -161,6 +161,11 @@ void DifferentialVelControl::generateAttitudeAndThrottleSetpoint()
 		speed_body_x_setpoint = math::constrain(_differential_velocity_setpoint.speed, -_param_ro_speed_limit.get(),
 							_param_ro_speed_limit.get());
 
+		// Apply collision prevention to speed setpoint
+		if (_collision_prevention.isActive() && speed_body_x_setpoint > 0.f) {
+			speed_body_x_setpoint = _collision_prevention.modifySpeedSetpoint(speed_body_x_setpoint, _vehicle_yaw);
+		}
+
 		const float speed_body_x_setpoint_normalized = math::interpolate<float>(speed_body_x_setpoint,
 				-_param_ro_max_thr_speed.get(), _param_ro_max_thr_speed.get(), -1.f, 1.f);
 

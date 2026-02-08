@@ -39,6 +39,7 @@
 
 // Libraries
 #include <lib/rover_control/RoverControl.hpp>
+#include <lib/rover_collision_prevention/RoverCollisionPrevention.hpp>
 #include <lib/pid/PID.hpp>
 #include <matrix/matrix/math.hpp>
 #include <lib/slew_rate/SlewRate.hpp>
@@ -200,6 +201,9 @@ private:
 
 	// Class Instances
 	MapProjection _global_ned_proj_ref{}; // Transform global to NED coordinates
+
+	// Collision Prevention
+	RoverCollisionPrevention _collision_prevention{this};
 
 	DEFINE_PARAMETERS(
 		(ParamFloat<px4::params::RM_MISS_SPD_GAIN>) _param_rm_miss_spd_gain,

@@ -106,6 +106,12 @@ void MecanumPosVelControl::updatePosControl()
 		rover_throttle_setpoint.timestamp = _timestamp;
 		_speed_body_x_setpoint = fabsf(_speed_body_x_setpoint) > _param_ro_speed_th.get() ? _speed_body_x_setpoint : 0.f;
 		_speed_body_y_setpoint = fabsf(_speed_body_y_setpoint) > _param_ro_speed_th.get() ? _speed_body_y_setpoint : 0.f;
+
+		// Apply collision prevention to forward speed setpoint
+		if (_collision_prevention.isActive() && _speed_body_x_setpoint > 0.f) {
+			_speed_body_x_setpoint = _collision_prevention.modifySpeedSetpoint(_speed_body_x_setpoint, _vehicle_yaw);
+		}
+
 		rover_throttle_setpoint.throttle_body_x = RoverControl::speedControl(_speed_x_setpoint, _pid_speed_x,
 				_speed_body_x_setpoint, _vehicle_speed_body_x, _param_ro_accel_limit.get(), _param_ro_decel_limit.get(),
 				_param_ro_max_thr_speed.get(), _dt);
