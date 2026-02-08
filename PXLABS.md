@@ -29,7 +29,63 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 - Ubuntu 20.04 / 22.04 (recommended)
 - Git
 - Python 3.8+
-- ARM GCC Toolchain (for hardware builds)
+- ARM GCC Toolchain **v9.3.1** (for hardware builds) - See [Toolchain Requirements](#toolchain-requirements)
+
+## Toolchain Requirements
+
+> **CRITICAL: PX4 v1.16.0 requires GCC 9.3.1 (`arm-none-eabi-gcc`)**
+
+### Known Issue: Compiler Version Incompatibility
+
+Using newer GCC compiler versions with PX4 v1.16.0 causes critical issues affecting both bootloader and application code. This was identified during production testing on FMU-V6XRT boards.
+
+| Issue | Description |
+|-------|-------------|
+| **Affected Boards** | FMU-V6XRT (and potentially other targets) |
+| **Root Cause** | Newer GCC compiler versions introduce bugs in generated code |
+| **Symptoms** | Board fails to boot or behaves unexpectedly |
+| **Solution** | Use GCC 9.3.1 for all builds |
+
+### Recommended Toolchain Setup
+
+```bash
+# Verify your current ARM GCC version
+arm-none-eabi-gcc --version
+
+# Expected output should show: arm-none-eabi-gcc (GNU Arm Embedded Toolchain 9-2020-q2-update) 9.3.1
+```
+
+### Installing GCC 9.3.1
+
+If you have a different version, install the correct toolchain:
+
+```bash
+# Remove existing toolchain (if any)
+sudo apt remove gcc-arm-none-eabi
+
+# Download GCC 9.3.1 (9-2020-q2-update)
+wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2
+
+# Extract to /opt
+sudo tar -xjf gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2 -C /opt
+
+# Add to PATH (add to ~/.bashrc for persistence)
+export PATH="/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:$PATH"
+
+# Verify installation
+arm-none-eabi-gcc --version
+```
+
+### FMU-V6XRT Bootloader
+
+If you experience boot issues on FMU-V6XRT, ensure the bootloader is compiled with GCC 9.3.1:
+
+```bash
+# Build bootloader with correct toolchain
+make px4_fmu-v6xrt_bootloader
+```
+
+> **Note:** A pre-compiled working bootloader (`px4_fmu-v6xrt_bootloader.bin`) compiled with GCC 9.3.1 is available. Contact PXLABS for access if needed.
 
 ### Clone Repository
 
