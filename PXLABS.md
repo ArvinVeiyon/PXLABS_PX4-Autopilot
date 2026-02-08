@@ -274,14 +274,16 @@ To enable collision prevention on a rover:
 
 ## Changelog
 
-### pxlabs-v1.16.0-dev (Development)
+### pxlabs-v1.16.0-r2-Beta (Current Beta)
 
 - Added rover collision prevention for all rover types (Ackermann, Differential, Mecanum)
-- Unified with standard PX4 CP_* parameters
+- Unified with standard PX4 `CP_*` parameters
 - Multi-sensor support with FOV spreading
 - Yaw guidance for obstacle avoidance
+- Delay compensation and auto-loiter on sensor timeout
+- Publishes `obstacle_distance_fused` and `collision_constraints` for debugging
 
-### pxlabs-v1.16.0-r1 (Initial Release)
+### pxlabs-v1.16.0-r1 (Stable Release)
 
 - Initial fork from PX4 v1.16.0
 - Added Ackermann steering rover support
