@@ -51,6 +51,7 @@ RoverCollisionPrevention::RoverCollisionPrevention(ModuleParams *parent) :
 		_obstacle_distances[i] = UINT16_MAX;
 		_data_timestamps[i] = 0;
 		_data_maxranges[i] = UINT16_MAX;
+		_data_fov[i] = 0;
 	}
 }
 
@@ -69,6 +70,8 @@ bool RoverCollisionPrevention::isActive()
 
 float RoverCollisionPrevention::modifySpeedSetpoint(float speed_setpoint, float vehicle_yaw)
 {
+	(void)vehicle_yaw;
+
 	if (!isActive()) {
 		return speed_setpoint;
 	}
@@ -87,8 +90,9 @@ float RoverCollisionPrevention::modifySpeedSetpoint(float speed_setpoint, float 
 	// Get closest obstacle distance in front sector
 	float obstacle_distance = getObstacleDistanceFront();
 
-	// Check if we have valid data
-	if (!_obstacle_data_present && !_param_cp_go_no_data.get()) {
+	// Check if we have valid data in the commanded forward sector.
+	// Match multicopter semantics: CP_GO_NO_DATA allows unknown areas, but not timed-out bins inside known FOV.
+	if (!_front_obstacle_data_present && (!_param_cp_go_no_data.get() || _front_data_timed_out_in_fov)) {
 		// No obstacle data and not allowed to move without data
 		mavlink_log_warning(&_mavlink_log_pub, "Rover collision prevention: no sensor data\t");
 
@@ -104,16 +108,11 @@ float RoverCollisionPrevention::modifySpeedSetpoint(float speed_setpoint, float 
 		return 0.f;
 	}
 
-	// Apply delay compensation based on sensor age and CP_DELAY
-	if (PX4_ISFINITE(obstacle_distance) && obstacle_distance > 0.f) {
-		const float data_age_s = (_closest_distance_front_timestamp > 0) ?
-					 ((now - _closest_distance_front_timestamp) * 1e-6f) : 0.f;
-		const float delay_s = math::max(0.f, _param_cp_delay.get() + data_age_s);
-		obstacle_distance -= speed_setpoint * delay_s;
-	}
+	const float data_age_s = (_closest_distance_front_timestamp > 0) ?
+				 ((now - _closest_distance_front_timestamp) * 1e-6f) : 0.f;
 
 	// Calculate speed limit based on obstacle distance
-	float speed_limit_factor = _calculateSpeedLimit(obstacle_distance, speed_setpoint);
+	float speed_limit_factor = _calculateSpeedLimit(obstacle_distance, speed_setpoint, data_age_s);
 
 	// Apply minimum speed if we're slowing down but not stopped
 	float modified_speed = speed_setpoint * speed_limit_factor;
@@ -142,7 +141,7 @@ float RoverCollisionPrevention::modifyYawSetpoint(float desired_yaw, float vehic
 
 	_updateObstacleData();
 
-	if (!_obstacle_data_present) {
+	if (!_any_obstacle_data_present) {
 		return desired_yaw;
 	}
 
@@ -184,7 +183,7 @@ void RoverCollisionPrevention::_updateObstacleData()
 		distance_sensor_s distance_sensor;
 
 		if (sub.update(&distance_sensor)) {
-			_addDistanceSensorData(distance_sensor, vehicle_yaw);
+			_addDistanceSensorData(distance_sensor);
 		}
 	}
 
@@ -195,7 +194,9 @@ void RoverCollisionPrevention::_updateObstacleData()
 
 	// Check for stale data and find closest obstacle in front
 	_data_stale = true;
-	_obstacle_data_present = false;
+	_any_obstacle_data_present = false;
+	_front_obstacle_data_present = false;
+	_front_data_timed_out_in_fov = false;
 	_closest_distance_front = FLT_MAX;
 	_closest_distance_front_timestamp = 0;
 
@@ -207,11 +208,14 @@ void RoverCollisionPrevention::_updateObstacleData()
 		// Check if this bin is in the front sector
 		bool in_front_sector = (i >= front_start_bin) || (i <= front_end_bin);
 
-	if (_data_timestamps[i] > 0 && (now - _data_timestamps[i]) < DATA_TIMEOUT_US) {
+		const bool data_valid = (_data_timestamps[i] > 0) && ((now - _data_timestamps[i]) < DATA_TIMEOUT_US);
+
+		if (data_valid) {
 			_data_stale = false;
-			_obstacle_data_present = true;
+			_any_obstacle_data_present = true;
 
 			if (in_front_sector) {
+				_front_obstacle_data_present = true;
 				float distance_m = _obstacle_distances[i] / 100.f;  // cm to m
 
 				if (distance_m < _closest_distance_front) {
@@ -219,10 +223,17 @@ void RoverCollisionPrevention::_updateObstacleData()
 					_closest_distance_front_timestamp = _data_timestamps[i];
 				}
 			}
+
+		} else {
+			_obstacle_distances[i] = UINT16_MAX;
+
+			if (in_front_sector && _data_fov[i]) {
+				_front_data_timed_out_in_fov = true;
+			}
 		}
 	}
 
-	if (_obstacle_data_present) {
+	if (_any_obstacle_data_present) {
 		_last_data_time = now;
 	}
 
@@ -271,7 +282,7 @@ float RoverCollisionPrevention::_getObstacleDistance(float direction_rad)
 	return FLT_MAX;
 }
 
-float RoverCollisionPrevention::_calculateSpeedLimit(float obstacle_distance, float speed_setpoint)
+float RoverCollisionPrevention::_calculateSpeedLimit(float obstacle_distance, float speed_setpoint, float data_age_s)
 {
 	const float min_dist = _param_cp_dist.get();
 
@@ -279,8 +290,8 @@ float RoverCollisionPrevention::_calculateSpeedLimit(float obstacle_distance, fl
 		return 1.f;
 	}
 
-	// Define a slow-down distance based on minimum distance and configured delay
-	const float delay_s = math::max(0.f, _param_cp_delay.get());
+	// Define a slow-down distance based on minimum distance and compensated sensor delay.
+	const float delay_s = math::max(0.f, _param_cp_delay.get() + data_age_s);
 	const float slow_dist = min_dist + math::max(1.f, speed_setpoint * delay_s);
 
 	if (obstacle_distance <= min_dist) {
@@ -304,7 +315,7 @@ float RoverCollisionPrevention::_selectGuidedDirection(float desired_direction_r
 {
 	const float guide_angle = _param_cp_guide_ang.get();
 
-	if (guide_angle <= 0.f || !_obstacle_data_present) {
+	if (guide_angle <= 0.f || !_any_obstacle_data_present) {
 		return desired_direction_rad;
 	}
 
@@ -357,7 +368,7 @@ float RoverCollisionPrevention::_selectGuidedDirection(float desired_direction_r
 	return math::radians(guided_deg);
 }
 
-void RoverCollisionPrevention::_addDistanceSensorData(const distance_sensor_s &distance_sensor, float vehicle_yaw)
+void RoverCollisionPrevention::_addDistanceSensorData(const distance_sensor_s &distance_sensor)
 {
 	// Only use horizontal sensors (orientation pointing forward, left, right, back)
 	if (distance_sensor.orientation == distance_sensor_s::ROTATION_DOWNWARD_FACING ||
@@ -365,69 +376,93 @@ void RoverCollisionPrevention::_addDistanceSensorData(const distance_sensor_s &d
 		return;
 	}
 
-	// Get sensor orientation in body frame
-	float sensor_yaw_body = 0.f;
+	float distance_reading = math::min(distance_sensor.current_distance, distance_sensor.max_distance);
 
-	switch (distance_sensor.orientation) {
-	case distance_sensor_s::ROTATION_FORWARD_FACING:
-		sensor_yaw_body = 0.f;
-		break;
-
-	case distance_sensor_s::ROTATION_RIGHT_FACING:
-		sensor_yaw_body = math::radians(90.f);
-		break;
-
-	case distance_sensor_s::ROTATION_BACKWARD_FACING:
-		sensor_yaw_body = math::radians(180.f);
-		break;
-
-	case distance_sensor_s::ROTATION_LEFT_FACING:
-		sensor_yaw_body = math::radians(-90.f);
-		break;
-
-	default:
-		// Use h_fov for custom orientations if available
-		sensor_yaw_body = distance_sensor.h_fov / 2.f;  // Approximate
-		break;
+	// Negative current distance with invalid quality indicates "no return, but sensor healthy".
+	if (fabsf(distance_sensor.current_distance - -1.f) < FLT_EPSILON && distance_sensor.signal_quality == 0) {
+		distance_reading = distance_sensor.max_distance;
 	}
 
-	// Convert to bin index (relative to body frame, 0 = forward)
-	float sensor_yaw_deg = math::degrees(sensor_yaw_body);
+	// Discard values below minimum range.
+	if (distance_reading <= distance_sensor.min_distance) {
+		return;
+	}
 
+	// Get sensor orientation in body frame.
+	float sensor_yaw_body_rad = 0.f;
+
+	if (distance_sensor.orientation <= distance_sensor_s::ROTATION_YAW_315) {
+		sensor_yaw_body_rad = math::radians(45.f * distance_sensor.orientation);
+
+	} else if (distance_sensor.orientation == distance_sensor_s::ROTATION_CUSTOM) {
+		const Quatf sensor_orientation_q(distance_sensor.q);
+		sensor_yaw_body_rad = Eulerf(sensor_orientation_q).psi();
+
+	} else {
+		return;
+	}
+
+	float sensor_yaw_deg = math::degrees(matrix::wrap_pi(sensor_yaw_body_rad));
 	while (sensor_yaw_deg < 0.f) { sensor_yaw_deg += 360.f; }
 
-	int bin_index = (int)(sensor_yaw_deg / BIN_SIZE) % BIN_COUNT;
+	const float fov_half_deg = math::max(0.5f * BIN_SIZE, 0.5f * math::degrees(distance_sensor.h_fov));
+	const int lower_bound = (int)roundf((sensor_yaw_deg - fov_half_deg) / BIN_SIZE);
+	const int upper_bound = (int)roundf((sensor_yaw_deg + fov_half_deg) / BIN_SIZE);
+	const uint16_t distance_cm = static_cast<uint16_t>(distance_reading * 100.f + 0.5f);
+	const uint16_t max_range_cm = static_cast<uint16_t>(distance_sensor.max_distance * 100.f + 0.5f);
 
-	// Store distance if valid
-	if (distance_sensor.current_distance >= distance_sensor.min_distance &&
-	    distance_sensor.current_distance <= distance_sensor.max_distance) {
+	for (int bin = lower_bound; bin <= upper_bound; ++bin) {
+		const int wrapped_bin = (bin % BIN_COUNT + BIN_COUNT) % BIN_COUNT;
 
-		uint16_t distance_cm = (uint16_t)(distance_sensor.current_distance * 100.f);
-		_obstacle_distances[bin_index] = distance_cm;
-		_data_timestamps[bin_index] = distance_sensor.timestamp;
-		_data_maxranges[bin_index] = (uint16_t)(distance_sensor.max_distance * 100.f);
+		if (_data_timestamps[wrapped_bin] + DATA_TIMEOUT_US < distance_sensor.timestamp ||
+		    _obstacle_distances[wrapped_bin] == UINT16_MAX ||
+		    distance_cm <= _obstacle_distances[wrapped_bin]) {
+			_obstacle_distances[wrapped_bin] = distance_cm;
+			_data_timestamps[wrapped_bin] = distance_sensor.timestamp;
+			_data_maxranges[wrapped_bin] = max_range_cm;
+			_data_fov[wrapped_bin] = 1;
+		}
 	}
 }
 
 void RoverCollisionPrevention::_addObstacleDistanceData(const obstacle_distance_s &obstacle, float vehicle_yaw)
 {
+	if (obstacle.increment <= 0.f) {
+		return;
+	}
+
 	const hrt_abstime now = hrt_absolute_time();
+	const hrt_abstime sample_time = obstacle.timestamp > 0 ? obstacle.timestamp : now;
+	const float vehicle_orientation_deg = math::degrees(vehicle_yaw);
+	const bool is_global_frame = obstacle.frame == obstacle_distance_s::MAV_FRAME_GLOBAL
+				     || obstacle.frame == obstacle_distance_s::MAV_FRAME_LOCAL_NED;
 
-	// Copy obstacle distances from message
 	for (int i = 0; i < BIN_COUNT && i < (int)(sizeof(obstacle.distances) / sizeof(obstacle.distances[0])); i++) {
-		if (obstacle.distances[i] < obstacle.max_distance) {
-			// Adjust bin index based on message angle offset
-			float angle_deg = obstacle.angle_offset + (i * obstacle.increment);
+		const uint16_t distance_cm = obstacle.distances[i];
 
-			while (angle_deg < 0.f) { angle_deg += 360.f; }
+		// Ignore "no obstacle" and unknown values.
+		if (distance_cm == UINT16_MAX || distance_cm > obstacle.max_distance) {
+			continue;
+		}
 
-			while (angle_deg >= 360.f) { angle_deg -= 360.f; }
+		float angle_deg = obstacle.angle_offset + (i * obstacle.increment);
 
-			int bin_index = (int)(angle_deg / BIN_SIZE) % BIN_COUNT;
+		if (is_global_frame) {
+			angle_deg -= vehicle_orientation_deg;
+		}
 
-			_obstacle_distances[bin_index] = obstacle.distances[i];
-			_data_timestamps[bin_index] = now;
+		while (angle_deg < 0.f) { angle_deg += 360.f; }
+		while (angle_deg >= 360.f) { angle_deg -= 360.f; }
+
+		const int bin_index = (int)(angle_deg / BIN_SIZE) % BIN_COUNT;
+
+		if (_data_timestamps[bin_index] + DATA_TIMEOUT_US < sample_time ||
+		    _obstacle_distances[bin_index] == UINT16_MAX ||
+		    distance_cm <= _obstacle_distances[bin_index]) {
+			_obstacle_distances[bin_index] = distance_cm;
+			_data_timestamps[bin_index] = sample_time;
 			_data_maxranges[bin_index] = obstacle.max_distance;
+			_data_fov[bin_index] = 1;
 		}
 	}
 }

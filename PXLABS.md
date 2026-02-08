@@ -218,36 +218,37 @@ For questions and support related to PXLABS modifications, please open an issue 
 
 ## Development Branch (pxlabs-v1.16.0-dev)
 
-### Rover Collision Prevention - IN PROGRESS
+### Rover Collision Prevention - COMPLETE
 
-**Status:** Partially implemented, needs update to use standard CP_* parameters
+**Status:** Fully implemented and ready for testing
 
-#### Completed Work
+#### Implementation Summary
 
-1. **Created RoverCollisionPrevention library** (`src/lib/rover_collision_prevention/`)
+1. **RoverCollisionPrevention library** (`src/lib/rover_collision_prevention/`)
    - `RoverCollisionPrevention.hpp` - Header file
    - `RoverCollisionPrevention.cpp` - Implementation
-   - `rover_collision_prevention_params.c` - Parameters (currently RCP_*)
    - `CMakeLists.txt` - Build configuration
+   - Uses standard PX4 `CP_*` parameters (no custom param file needed)
 
 2. **Integrated into all rover modules:**
-   - Rover Ackermann (`AckermannVelControl`)
-   - Rover Differential (`DifferentialVelControl`)
-   - Rover Mecanum (`MecanumPosVelControl`)
+   - Rover Ackermann (`AckermannVelControl`) - speed + yaw guidance
+   - Rover Differential (`DifferentialVelControl`) - speed + yaw guidance
+   - Rover Mecanum (`MecanumPosVelControl`) - speed limiting only
 
-3. **Build tested successfully** for px4_fmu-v6xrt_default
+3. **Features:**
+   - Multi-sensor support (distance_sensor + obstacle_distance messages)
+   - FOV spreading across bins based on sensor `h_fov`
+   - Delay compensation with `CP_DELAY` + data age
+   - Yaw guidance to steer around obstacles (`CP_GUIDE_ANG`)
+   - Publishes `obstacle_distance_fused` and `collision_constraints` for debugging
+   - Auto-loiter on prolonged data timeout (5s)
+   - Mavlink warnings on sensor data loss
 
-#### Pending Work (TODO)
+4. **Build tested successfully** for px4_fmu-v6xrt_default
 
-None at this time.
+#### Parameters (CP_*)
 
-#### Codex CLI Suggestions (PX4 Collision Prevention Parity)
-
-- Distance sensor FOV handling: currently each distance sensor contributes to a single bin; PX4 standard behavior spreads readings across the sensor `h_fov` bins. Consider updating rover collision prevention to fill bins across FOV.
-- Delay compensation semantics: current rover logic uses `CP_DELAY` with a simple distance reduction based on speed; PX4 multicopter collision prevention models delay in its kinematic constraints. Consider aligning rover delay compensation more closely.
-- Config migration: existing rover configs that relied on `RCP_GO_NO_DATA=1` should be reviewed now that `CP_GO_NO_DATA=0` is the default.
-
-#### Current Parameters (CP_*)
+Uses standard PX4 collision prevention parameters:
 
 | Parameter | Default | Description |
 |-----------|---------|-------------|
@@ -256,18 +257,29 @@ None at this time.
 | `CP_GUIDE_ANG` | 30 deg | Guidance angle to steer around obstacles |
 | `CP_GO_NO_DATA` | 0 (disabled) | Allow movement without sensor data |
 
-#### Resume Instructions
+#### Usage
 
-To continue this work:
-1. Checkout dev branch: `git checkout pxlabs-v1.16.0-dev`
-2. Modify collision prevention params to use generic group
-3. Update rover code to use CP_* parameters
-4. Add missing features (delay, guidance, fused publish, timeout)
-5. Test build and commit
+To enable collision prevention on a rover:
+1. Set `CP_DIST` to desired minimum distance (e.g., 1.0 m)
+2. Configure distance sensors or obstacle_distance source
+3. Optionally adjust `CP_DELAY`, `CP_GUIDE_ANG`, `CP_GO_NO_DATA`
+
+#### Notes
+
+- Rear obstacle detection not implemented (forward only)
+- Mecanum uses speed limiting only, no yaw guidance
+- `CP_GO_NO_DATA=0` is the default - rover stops if no sensor data
 
 ---
 
 ## Changelog
+
+### pxlabs-v1.16.0-dev (Development)
+
+- Added rover collision prevention for all rover types (Ackermann, Differential, Mecanum)
+- Unified with standard PX4 CP_* parameters
+- Multi-sensor support with FOV spreading
+- Yaw guidance for obstacle avoidance
 
 ### pxlabs-v1.16.0-r1 (Initial Release)
 
