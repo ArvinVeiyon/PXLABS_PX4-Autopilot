@@ -8,7 +8,7 @@ import tabsPlugin from "@red-asuka/vitepress-plugin-tabs";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: "PX4 Guide (main)",
+  title: "PX4 Guide (v1.16)",
   description: "PX4 User and Developer Guide",
   base: process.env.BRANCH_NAME
     ? "/" + process.env.BRANCH_NAME + "/"
@@ -31,6 +31,7 @@ export default defineConfig({
       tabsPlugin(md); //https://github.com/Red-Asuka/vitepress-plugin-tabs
     },
   },
+  cleanUrls: true,
 
   vite: {
     plugins: [
@@ -197,11 +198,14 @@ export default defineConfig({
         text: "Version",
         items: [
           { text: "main", link: "https://docs.px4.io/main/en/" },
-          { text: "v1.15 (stable)", link: "https://docs.px4.io/v1.15/en/" },
+          {
+            text: "v1.16 (stable)",
+            link: "https://docs.px4.io/v1.16/en/",
+          },
+          { text: "v1.15", link: "https://docs.px4.io/v1.15/en/" },
           { text: "v1.14", link: "https://docs.px4.io/v1.14/en/" },
           { text: "v1.13", link: "https://docs.px4.io/v1.13/en/" },
           { text: "v1.12", link: "https://docs.px4.io/v1.12/en/" },
-          { text: "v1.11", link: "https://docs.px4.io/v1.11/en/" },
         ],
       },
     ],

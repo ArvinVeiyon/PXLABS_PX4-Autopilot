@@ -9,14 +9,6 @@ Developed by world-class developers from industry and academia, and supported by
 
 :::tip
 This guide contains everything you need to assemble, configure, and safely fly a PX4-based vehicle. Interested in contributing? Check out the [Development](development/development.md) section.
-
-:::
-
-:::warning
-This guide is for the _development_ version of PX4 (`main` branch).
-Use the **Version** selector to find the current _stable_ version.
-
-Documented changes since the stable release are captured in the evolving [release note](releases/main.md).
 :::
 
 ## How Do I Get Started?
@@ -97,7 +89,7 @@ You can access these from the Languages menu (top right):
 
 ![Language Selector](../assets/vuepress/language_selector.png)
 
-<!--@include: _contributors.md-->
+<!--@include: _contributors.md -->
 
 ## License
 
@@ -116,7 +108,6 @@ Select the links below to display the calendar in your timezone (and to add it t
 
 :::tip
 The calendar default timezone is Central European Time (CET).
-
 :::
 
 <iframe src="https://calendar.google.com/calendar/embed?title=Dronecode%20Calendar&amp;mode=WEEK&amp;height=600&amp;wkst=1&amp;bgcolor=%23FFFFFF&amp;src=linuxfoundation.org_g21tvam24m7pm7jhev01bvlqh8%40group.calendar.google.com&amp;color=%23691426&amp;ctz=Europe%2FZurich" style="border-width:0" width="800" height="600" frameborder="0" scrolling="no"></iframe>
