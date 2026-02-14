@@ -17,8 +17,10 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 
 | Property | Value |
 |----------|-------|
-| Base Version | PX4 v1.16.0 |
-| Branch | pxlabs-v1.16.0-r1 |
+| Latest Stable | pxlabs-v1.16.1-r1 |
+| Latest Beta | pxlabs-v1.16.1-r2-Beta |
+| Development | pxlabs-v1.16.1-dev |
+| Base Version | PX4 v1.16.1 |
 | Target Board | NXP FMU-V6XRT |
 | Upstream | https://github.com/PX4/PX4-Autopilot |
 | Maintainer | PXLABS |
@@ -274,16 +276,30 @@ To enable collision prevention on a rover:
 
 ## Changelog
 
-### pxlabs-v1.16.0-r2-Beta (Current Beta)
+### pxlabs-v1.16.1-r2-Beta (Current Beta)
 
+- Based on pxlabs-v1.16.1-r1
 - Added rover collision prevention for all rover types (Ackermann, Differential, Mecanum)
 - Unified with standard PX4 `CP_*` parameters
 - Multi-sensor support with FOV spreading
 - Yaw guidance for obstacle avoidance
 - Delay compensation and auto-loiter on sensor timeout
 - Publishes `obstacle_distance_fused` and `collision_constraints` for debugging
+- **WARNING: Collision prevention NOT YET TESTED**
 
-### pxlabs-v1.16.0-r1 (Stable Release)
+### pxlabs-v1.16.1-r1 (Stable Release)
+
+- Based on pxlabs-v1.16.0-r1 + PX4 v1.16.1 upstream fixes
+- All PX4 v1.16.1 bug fixes (RTL, GPS, sensors, MAVLink)
+- Custom V6XRT sensor configurations preserved
+- NO collision prevention (stable release)
+
+### pxlabs-v1.16.0-r2-Beta
+
+- Added rover collision prevention (based on v1.16.0)
+- Superseded by pxlabs-v1.16.1-r2-Beta
+
+### pxlabs-v1.16.0-r1
 
 - Initial fork from PX4 v1.16.0
 - Added Ackermann steering rover support
