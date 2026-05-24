@@ -140,6 +140,10 @@ make list_config_targets
 
 ```
 pxlabs/
+├── Documents/
+│   ├── Bootloader Update Pixhawk V6X-RT via USB _ PX4 Guide (main).pdf
+│   ├── bootloader_update_v6xrt.md
+│   └── Burning fuses on RT7.pdf
 ├── Parameters/
 │   └── PXlabs_Differential_Rover_NXP_tested_2026-05-24.params
 ├── NXP_Bootloader/
@@ -191,8 +195,102 @@ Flash usage: **61.80%** flash · **85.42%** ITCM · **5.39%** SRAM
 
 | Document | Description |
 |----------|-------------|
-| `pxlabs/Bootloader Update Pixhawk V6X-RT via USB.pdf` | Step-by-step bootloader update via USB using MCUXpresso |
-| `pxlabs/Burning fuses on RT7.pdf` | Fuse configuration procedure for RT7 variant |
+| [`Bootloader Update Pixhawk V6X-RT via USB.pdf`](pxlabs/Documents/Bootloader%20Update%20Pixhawk%20V6X-RT%20via%20USB%20_%20PX4%20Guide%20(main).pdf) | Step-by-step bootloader flash via USB using MCUXpresso (with screenshots) |
+| [`bootloader_update_v6xrt.md`](pxlabs/Documents/bootloader_update_v6xrt.md) | Bootloader update guide in markdown format |
+| [`Burning fuses on RT7.pdf`](pxlabs/Documents/Burning%20fuses%20on%20RT7.pdf) | Fuse configuration procedure for MIMXRT1176 (RT7 variant) |
+
+---
+
+## Hardware Setup Procedures
+
+### 1. Burning Fuses on MIMXRT1176 (First-time board setup)
+
+> **Required for new boards before flashing bootloader.**
+
+**Tool required:** [NXP MCUXpresso Secure Provisioning Tool](https://www.nxp.com/design/software/development-software/mcuxpresso-software-and-tools-/mcuxpresso-secure-provisioning-tool:MCUXPRESSO-SECURE-PROVISIONING#downloads)
+
+**Steps:**
+
+1. Install and launch **MCUXpresso Secure Provisioning**
+2. Select **MIMXRT1176** → click **Create**
+3. Select **OTP Configuration** → press **Yes** and wait for script to finish
+4. Navigate to fuse address **`0x960`**
+5. Set **`BT_FUSE_SEL`** → Required value: **1**
+6. Switch to **Advanced Mode** (bottom-left corner)
+7. Press **Close** → press **Generate Script**
+8. Script is generated at:
+   ```
+   C:\Users\<username>\secure_provisioning\burn_user_OTP_cfg_win.bat
+   ```
+9. Run `burn_user_OTP_cfg_win.bat` to burn fuses on new boards
+
+> **Note:** This only needs to be done once per board. Do not repeat fuse burning.
+
+---
+
+### 2. Flashing the Bootloader via USB (No debug probe required)
+
+**Tool required:** [NXP MCUXpresso Secure Provisioning Tool](https://www.nxp.com/design/software/development-software/mcuxpresso-software-and-tools-/mcuxpresso-secure-provisioning-tool:MCUXPRESSO-SECURE-PROVISIONING#downloads)
+
+**Bootloader file:** `pxlabs/PXLabs_Bootloader/px4_fmu-v6xrt_bootloader.bin`
+(or use `pxlabs/NXP_Bootloader/px4_fmu-v6xrt_bootloader.bin` if experiencing boot issues)
+
+#### Step 1 — Enter ISP Bootloader Mode
+
+**Option A — Board is working (via QGC):**
+1. Connect board → open QGroundControl
+2. Go to **Analyze Tools** → **MAVLink Console**
+3. Type `reboot -i` and press Enter
+4. Board enters ISP bootloader mode
+
+**Option B — Board is bricked:**
+1. Open the FMUM module
+2. Press and hold the **BOOT button** while powering the board
+
+#### Step 2 — Flash with MCUXpresso
+
+1. Launch **MCUXpresso Secure Provisioning**
+2. Create **New Workspace** → select `i.MX RT11xx` → `MIMXRT1176`
+3. Click **FlexSPI NOR - simplified**
+4. In Boot Memory Configuration set Device type to **`Macronix Octal DDR`** → press **OK**
+5. Go to **Tools → Flash Programmer**
+6. Press **YES** on the ISP mode popup → press **Yes** on target memory config
+7. Press **Erase All** — wait for completion
+8. Press **Load...** → **Browse** → select `px4_fmu-v6xrt_bootloader.bin` → **Load**
+9. Confirm **"Success: load from file"** message
+10. Press **Write** to flash
+11. Confirm **"Success: Write memory 0x30000000 - 0x3XXXXXXX"**
+12. Unplug and re-power the board
+
+#### Step 3 — Load PX4 Firmware via QGroundControl
+
+1. Open **QGroundControl**
+2. Go to **Vehicle Setup** → **Firmware**
+3. Connect board via USB — QGC will detect it
+4. Select **PX4 Pro Stable Release** or use **Advanced** to load custom firmware
+5. To load PXLABS firmware: select **Advanced** → **Custom firmware file** → browse to:
+   ```
+   pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.px4
+   ```
+6. Click **OK** — QGC will flash and reboot the board
+
+---
+
+### 3. Building Bootloader from Source
+
+```bash
+export PATH="/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:$PATH"
+
+# Build bootloader
+make px4_fmu-v6xrt_bootloader
+
+# Output: build/px4_fmu-v6xrt_bootloader/px4_fmu-v6xrt_bootloader.bin
+
+# Optional: convert to HEX
+arm-none-eabi-objcopy -O ihex \
+  build/px4_fmu-v6xrt_bootloader/px4_fmu-v6xrt_bootloader.elf \
+  px4_fmu-v6xrt_bootloader.hex
+```
 
 ### Custom Patch File
 
