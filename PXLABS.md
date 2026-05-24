@@ -142,13 +142,14 @@ make list_config_targets
 pxlabs/
 ├── Parameters/
 │   └── PXlabs_Differential_Rover_NXP_tested_2026-05-24.params
-├── NXP_Bootloader/              (to be added after build)
+├── NXP_Bootloader/
 │   └── px4_fmu-v6xrt_bootloader.bin
-├── PXLabs_Bootloader/           (to be added after build)
+├── PXLabs_Bootloader/
 │   ├── px4_fmu-v6xrt_bootloader.bin
 │   ├── px4_fmu-v6xrt_bootloader.elf
-│   └── px4_fmu-v6xrt_bootloader.map
-├── PXLabs_Firmware/             (to be added after build)
+│   ├── px4_fmu-v6xrt_bootloader.map
+│   └── px4_fmu-v6xrt_bootloader.px4
+├── PXLabs_Firmware/
 │   ├── px4_fmu-v6xrt_default.bin
 │   ├── px4_fmu-v6xrt_default.px4
 │   ├── px4_fmu-v6xrt_default.elf
@@ -166,27 +167,27 @@ To load parameters: open QGroundControl → Vehicle Setup → Parameters → Too
 
 ### Pre-compiled Bootloaders
 
-> **Note:** Bootloader binaries to be added after v1.17.0 build is complete.
+Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 
 | Bootloader | Path | Notes |
 |------------|------|-------|
 | NXP Bootloader | `pxlabs/NXP_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Provided by NXP, compiled with GCC 9.3.1 — **use this if experiencing boot issues** |
-| PXLabs Bootloader | `pxlabs/PXLabs_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Built by PXLABS with GCC 9.3.1 — includes .elf/.map for debugging |
+| PXLabs Bootloader | `pxlabs/PXLabs_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Built by PXLABS with GCC 9.3.1 — flash: 82KB / 128KB (63.14%) |
 
 ### Pre-compiled Firmware
 
-> **Note:** Firmware binaries to be added after v1.17.0 build is complete.
+Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 
-| File | Path | Description |
-|------|------|-------------|
-| Firmware binary | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` | Flash via QGC |
-| PX4 package | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.px4` | Flash via QGC |
-| ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` | For GDB debugging |
-| Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` | Symbol map |
+| File | Path | Size | Description |
+|------|------|------|-------------|
+| Firmware binary | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` | 2.4 MB | Flash via QGC |
+| PX4 package | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.px4` | 2.2 MB | Flash via QGC |
+| ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` | 57 MB | For GDB debugging |
+| Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` | 11 MB | Symbol map |
+
+Flash usage: **61.80%** flash · **85.42%** ITCM · **5.39%** SRAM
 
 ### Setup Documents
-
-> **Note:** PDF guides available in the v1.16.x branch. To be carried over after v1.17.0 build.
 
 | Document | Description |
 |----------|-------------|
