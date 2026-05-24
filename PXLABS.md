@@ -138,7 +138,35 @@ make list_config_targets
 
 ## PXLABS Resources (`pxlabs/` folder)
 
+```
+pxlabs/
+├── Parameters/
+│   └── PXlabs_Differential_Rover_NXP_tested_2026-05-24.params
+├── NXP_Bootloader/              (to be added after build)
+│   └── px4_fmu-v6xrt_bootloader.bin
+├── PXLabs_Bootloader/           (to be added after build)
+│   ├── px4_fmu-v6xrt_bootloader.bin
+│   ├── px4_fmu-v6xrt_bootloader.elf
+│   └── px4_fmu-v6xrt_bootloader.map
+├── PXLabs_Firmware/             (to be added after build)
+│   ├── px4_fmu-v6xrt_default.bin
+│   ├── px4_fmu-v6xrt_default.px4
+│   ├── px4_fmu-v6xrt_default.elf
+│   └── px4_fmu-v6xrt_default.map
+└── PXLABS_V6XRT_CUSTOM.patch
+```
+
+### Parameters
+
+| File | Vehicle | Status | Date |
+|------|---------|--------|------|
+| [`PXlabs_Differential_Rover_NXP_tested_2026-05-24.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-05-24.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-05-24 |
+
+To load parameters: open QGroundControl → Vehicle Setup → Parameters → Tools → Load from file.
+
 ### Pre-compiled Bootloaders
+
+> **Note:** Bootloader binaries to be added after v1.17.0 build is complete.
 
 | Bootloader | Path | Notes |
 |------------|------|-------|
@@ -147,26 +175,34 @@ make list_config_targets
 
 ### Pre-compiled Firmware
 
-| File | Path |
-|------|------|
-| Firmware binary | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` |
-| PX4 package | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.px4` |
-| ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` |
-| Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` |
+> **Note:** Firmware binaries to be added after v1.17.0 build is complete.
+
+| File | Path | Description |
+|------|------|-------------|
+| Firmware binary | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` | Flash via QGC |
+| PX4 package | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.px4` | Flash via QGC |
+| ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` | For GDB debugging |
+| Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` | Symbol map |
 
 ### Setup Documents
 
+> **Note:** PDF guides available in the v1.16.x branch. To be carried over after v1.17.0 build.
+
 | Document | Description |
 |----------|-------------|
-| [Bootloader Update Guide](pxlabs/Bootloader%20Update%20Pixhawk%20V6X-RT%20via%20USB%20_%20PX4%20Guide%20(main).pdf) | Step-by-step bootloader update via USB |
-| [Burning Fuses on RT7](pxlabs/Burning%20fuses%20on%20RT7.pdf) | Fuse configuration for RT7 variant |
+| `pxlabs/Bootloader Update Pixhawk V6X-RT via USB.pdf` | Step-by-step bootloader update via USB using MCUXpresso |
+| `pxlabs/Burning fuses on RT7.pdf` | Fuse configuration procedure for RT7 variant |
 
 ### Custom Patch File
 
-`pxlabs/PXLABS_V6XRT_CUSTOM.patch` — diff of all PXLABS changes against the upstream base. Use this to review or re-apply changes to future upstream versions:
+`pxlabs/PXLABS_V6XRT_CUSTOM.patch` — complete diff of all PXLABS changes against the upstream PX4 v1.17.0 base. Use this to review or re-apply changes to future upstream versions:
 
 ```bash
+# Regenerate patch
 git diff px4-v1.17.0..pxlabs-v1.17.0-r1 -- boards/ src/modules/uxrce_dds_client/
+
+# Apply patch to a new upstream branch
+git apply --3way pxlabs/PXLABS_V6XRT_CUSTOM.patch
 ```
 
 ---
