@@ -1,313 +1,218 @@
-# PXLABS PX4-Autopilot v1.17.0
+# PXLABS PX4-Autopilot
 
 ## Overview
 
-This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/PX4-Autopilot) maintained by **PXLABS**. It is based on PX4 v1.17.0 and includes custom modifications for specialized vehicle platforms.
-
-## Modifications
-
-### Rover Support Enhancements
-
-- **Ackermann Steering Rover**: Added support for Ackermann steering geometry vehicles
-- **Differential Drive Rover**: Added support for differential drive rover platforms
-- **DDS Updates**: Updated DDS (Data Distribution Service) configuration for rover platforms
-- **Driver Updates**: Custom driver modifications for enhanced vehicle control
+This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/PX4-Autopilot) maintained by **PXLABS**. It targets the **NXP FMU-V6XRT** flight controller with enhanced rover support for Ackermann, Differential, and Mecanum platforms.
 
 ## Repository Information
 
 | Property | Value |
 |----------|-------|
-| Latest Stable | pxlabs-v1.17.0-r1 |
+| Latest Stable | `pxlabs-v1.17.0-r1` |
 | Latest Beta | - |
-| Development | pxlabs-v1.17.0-dev |
-| Base Version | PX4 v1.17.0 |
+| Development | `pxlabs-v1.17.0-dev` |
+| Upstream Base | PX4 v1.17.0 |
 | Target Board | NXP FMU-V6XRT |
-| Upstream | https://github.com/PX4/PX4-Autopilot |
+| Upstream Repo | https://github.com/PX4/PX4-Autopilot |
 | Maintainer | PXLABS |
 
-## Getting Started
+## Branch Structure
 
-### Prerequisites
+| Branch | Description |
+|--------|-------------|
+| `px4-v1.17.0` | Clean upstream PX4 v1.17.0 — no PXLABS changes (reference base) |
+| `pxlabs-v1.17.0-r1` | **Current stable** — PXLABS modifications on PX4 v1.17.0 |
+| `pxlabs-v1.17.0-dev` | Active development for next release |
+| `pxlabs-v1.16.1-r1` | Previous stable (PX4 v1.16.1 based) |
+| `pxlabs-v1.16.1-r2-Beta` | Previous beta — collision prevention (untested) |
 
-- Ubuntu 20.04 / 22.04 (recommended)
-- Git
-- Python 3.8+
-- ARM GCC Toolchain **v9.3.1** (for hardware builds) - See [Toolchain Requirements](#toolchain-requirements)
+## PXLABS Modifications (v1.17.0)
+
+### Sensor Configuration (NXP FMU-V6XRT)
+
+Custom IMU SPI bus and rotation corrections across all 3 hardware variants:
+
+| Variant | LPSPI1 | LPSPI2 | LPSPI3 |
+|---------|--------|--------|--------|
+| V6XRT000 / V6XRT001 | ICM42688P `-R 12` | ICM45686 `-R 10` | BMI088 `-R 12` |
+| V6XRT002 | ICM42688P `-R 12` | ICM45686 `-R 10` | BMI088 `-R 12` |
+
+Additional changes:
+- BMM350 magnetometer enabled on V6XRT000
+- ist8310 external compass disabled (not used on custom build)
+
+### Board Configuration
+
+- `CONFIG_COMMON_OPTICAL_FLOW=y` — optical flow sensor support
+- `CONFIG_MODULES_ROVER_ACKERMANN=y` — Ackermann steering controller
+- `CONFIG_MODULES_ROVER_DIFFERENTIAL=y` — differential drive controller
+- `CONFIG_MODULES_ROVER_MECANUM=y` — Mecanum wheel controller (via rover.px4board)
+
+### DDS Topics (uXRCE-DDS)
+
+**Publications added (FMU → ROS2):**
+- `/fmu/out/input_rc` — RC input telemetry
+- `/fmu/out/rover_throttle_setpoint` — rover throttle feedback
+- `/fmu/out/rover_steering_setpoint` — rover steering feedback
+
+**Subscriptions (already in upstream v1.17.0):**
+- `/fmu/in/rover_position_setpoint`
+- `/fmu/in/rover_attitude_setpoint`
+- `/fmu/in/rover_rate_setpoint`
+- `/fmu/in/rover_throttle_setpoint`
+- `/fmu/in/rover_steering_setpoint`
+
+---
 
 ## Toolchain Requirements
 
-> **CRITICAL: PX4 v1.16.0 requires GCC 9.3.1 (`arm-none-eabi-gcc`)**
-
-### Known Issue: Compiler Version Incompatibility
-
-Using newer GCC compiler versions with PX4 v1.16.0 causes critical issues affecting both bootloader and application code. This was identified during production testing on FMU-V6XRT boards.
-
-| Issue | Description |
-|-------|-------------|
-| **Affected Boards** | FMU-V6XRT (and potentially other targets) |
-| **Root Cause** | Newer GCC compiler versions introduce bugs in generated code |
-| **Symptoms** | Board fails to boot or behaves unexpectedly |
-| **Solution** | Use GCC 9.3.1 for all builds |
-
-### Recommended Toolchain Setup
+> **CRITICAL: Use GCC arm-none-eabi 9.3.1 — newer versions cause boot failures on FMU-V6XRT**
 
 ```bash
-# Verify your current ARM GCC version
-arm-none-eabi-gcc --version
-
-# Expected output should show: arm-none-eabi-gcc (GNU Arm Embedded Toolchain 9-2020-q2-update) 9.3.1
-```
-
-### Installing GCC 9.3.1
-
-If you have a different version, install the correct toolchain:
-
-```bash
-# Remove existing toolchain (if any)
+# Remove existing toolchain
 sudo apt remove gcc-arm-none-eabi
 
-# Download GCC 9.3.1 (9-2020-q2-update)
+# Download GCC 9.3.1
 wget https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2020q2/gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2
 
-# Extract to /opt
+# Extract
 sudo tar -xjf gcc-arm-none-eabi-9-2020-q2-update-x86_64-linux.tar.bz2 -C /opt
 
 # Add to PATH (add to ~/.bashrc for persistence)
 export PATH="/opt/gcc-arm-none-eabi-9-2020-q2-update/bin:$PATH"
 
-# Verify installation
+# Verify — must show 9.3.1
 arm-none-eabi-gcc --version
 ```
 
-### FMU-V6XRT Bootloader
+---
 
-If you experience boot issues on FMU-V6XRT, ensure the bootloader is compiled with GCC 9.3.1:
-
-```bash
-# Build bootloader with correct toolchain
-make px4_fmu-v6xrt_bootloader
-```
-
-## PXLABS Resources
-
-All PXLABS-specific resources are located in the `pxlabs/` folder.
-
-### Pre-compiled Bootloaders
-
-| Bootloader | Path | Description |
-|------------|------|-------------|
-| **NXP Bootloader** | `pxlabs/NXP_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Provided by NXP (Peter), compiled with GCC 9.3.1 - **Use this if experiencing boot issues** |
-| **PXLabs Bootloader** | `pxlabs/PXLabs_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Built by PXLABS with GCC 9.3.1 after NXP recommendation |
-
-> **Recommendation:** Use the NXP bootloader if you experience boot failures. The PXLabs bootloader includes additional build artifacts (.elf, .map, .px4) for debugging.
-
-### Pre-compiled Firmware
-
-| Firmware | Path | Description |
-|----------|------|-------------|
-| **PXLabs Firmware** | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` | FMU-V6XRT firmware with rover modifications |
-
-Build artifacts included:
-- `px4_fmu-v6xrt_default.bin` - Binary firmware file
-- `px4_fmu-v6xrt_default.px4` - PX4 firmware package
-- `px4_fmu-v6xrt_default.elf` - ELF file for debugging
-- `px4_fmu-v6xrt_default.map` - Memory map file
-
-### Setup Procedure Documents
-
-Important setup and configuration guides for NXP FMU-V6XRT:
-
-| Document | Description |
-|----------|-------------|
-| [Bootloader Update Guide](pxlabs/Bootloader%20Update%20Pixhawk%20V6X-RT%20via%20USB%20_%20PX4%20Guide%20(main).pdf) | Step-by-step guide for updating bootloader via USB |
-| [Burning Fuses on RT7](pxlabs/Burning%20fuses%20on%20RT7.pdf) | Fuse configuration procedure for RT7 |
-
-> **Important:** Review these documents before performing hardware setup or bootloader updates.
+## Getting Started
 
 ### Clone Repository
 
 ```bash
-git clone https://github.com/ArvinVeiyon/PXLABS_PX4-Autopilot_v1.17.0.git
-cd PXLABS_PX4-Autopilot_v1.17.0
+git clone https://github.com/ArvinVeiyon/PXLABS_PX4-Autopilot.git
+cd PXLABS_PX4-Autopilot
+
+# Stable release
 git checkout pxlabs-v1.17.0-r1
+
+# OR development
+git checkout pxlabs-v1.17.0-dev
+
 git submodule update --init --recursive
 ```
 
 ### Setup Development Environment
 
 ```bash
-# Install dependencies
 bash ./Tools/setup/ubuntu.sh
-
-# Build for SITL (Software In The Loop)
-make px4_sitl_default
 ```
 
-### Build for Hardware (NXP FMU-V6XRT)
+### Build Commands
 
 ```bash
-# Build firmware for NXP FMU-V6XRT
+# Firmware for NXP FMU-V6XRT
 make px4_fmu-v6xrt_default
 
-# Build bootloader for NXP FMU-V6XRT
+# Rover-only firmware (Ackermann + Differential + Mecanum)
+make px4_fmu-v6xrt_rover
+
+# Bootloader
 make px4_fmu-v6xrt_bootloader
 
-# Clean build (if needed)
-make px4_fmu-v6xrt_default clean
-
-# Upload firmware via USB
+# Upload via USB
 make px4_fmu-v6xrt_default upload
 
-# List all available targets
+# SITL simulation
+make px4_sitl gazebo
+make px4_sitl gazebo_rover
+make px4_sitl gazebo_rover_ackermann
+
+# List all targets
 make list_config_targets
 ```
 
-## Simulation
+---
 
-### Gazebo Simulation
+## PXLABS Resources (`pxlabs/` folder)
+
+### Pre-compiled Bootloaders
+
+| Bootloader | Path | Notes |
+|------------|------|-------|
+| NXP Bootloader | `pxlabs/NXP_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Provided by NXP, compiled with GCC 9.3.1 — **use this if experiencing boot issues** |
+| PXLabs Bootloader | `pxlabs/PXLabs_Bootloader/px4_fmu-v6xrt_bootloader.bin` | Built by PXLABS with GCC 9.3.1 — includes .elf/.map for debugging |
+
+### Pre-compiled Firmware
+
+| File | Path |
+|------|------|
+| Firmware binary | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.bin` |
+| PX4 package | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.px4` |
+| ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` |
+| Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` |
+
+### Setup Documents
+
+| Document | Description |
+|----------|-------------|
+| [Bootloader Update Guide](pxlabs/Bootloader%20Update%20Pixhawk%20V6X-RT%20via%20USB%20_%20PX4%20Guide%20(main).pdf) | Step-by-step bootloader update via USB |
+| [Burning Fuses on RT7](pxlabs/Burning%20fuses%20on%20RT7.pdf) | Fuse configuration for RT7 variant |
+
+### Custom Patch File
+
+`pxlabs/PXLABS_V6XRT_CUSTOM.patch` — diff of all PXLABS changes against the upstream base. Use this to review or re-apply changes to future upstream versions:
 
 ```bash
-make px4_sitl gazebo
+git diff px4-v1.17.0..pxlabs-v1.17.0-r1 -- boards/ src/modules/uxrce_dds_client/
 ```
 
-### Rover Simulation
+---
 
-```bash
-# For differential drive rover
-make px4_sitl gazebo_rover
+## Rover Controllers
 
-# For Ackermann rover
-make px4_sitl gazebo_rover_ackermann
-```
-
-## Custom Modules
-
-### Rover Controllers
-
-The following custom rover modules are included:
-
-1. **Differential Drive Controller**
-   - Path: `src/modules/rover_diff_drive/`
-   - Description: Controls differential drive rovers with independent wheel speeds
-
-2. **Ackermann Steering Controller**
-   - Path: `src/modules/rover_ackermann/`
-   - Description: Controls Ackermann steering geometry vehicles
-
-## Configuration
-
-### Vehicle Configuration Files
-
-Custom vehicle configurations are located in:
-- `ROMFS/px4fmu_common/init.d-posix/airframes/` - SITL airframes
-- `ROMFS/px4fmu_common/init.d/airframes/` - Hardware airframes
-
-## Contributing
-
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Create a Pull Request
-
-## License
-
-This project inherits the BSD 3-Clause License from PX4-Autopilot.
-
-## Contact
-
-For questions and support related to PXLABS modifications, please open an issue in this repository.
-
-## Development Branch (pxlabs-v1.17.0-dev)
-
-### Rover Collision Prevention - COMPLETE
-
-**Status:** Fully implemented and ready for testing
-
-#### Implementation Summary
-
-1. **RoverCollisionPrevention library** (`src/lib/rover_collision_prevention/`)
-   - `RoverCollisionPrevention.hpp` - Header file
-   - `RoverCollisionPrevention.cpp` - Implementation
-   - `CMakeLists.txt` - Build configuration
-   - Uses standard PX4 `CP_*` parameters (no custom param file needed)
-
-2. **Integrated into all rover modules:**
-   - Rover Ackermann (`AckermannVelControl`) - speed + yaw guidance
-   - Rover Differential (`DifferentialVelControl`) - speed + yaw guidance
-   - Rover Mecanum (`MecanumPosVelControl`) - speed limiting only
-
-3. **Features:**
-   - Multi-sensor support (distance_sensor + obstacle_distance messages)
-   - FOV spreading across bins based on sensor `h_fov`
-   - Delay compensation with `CP_DELAY` + data age
-   - Yaw guidance to steer around obstacles (`CP_GUIDE_ANG`)
-   - Publishes `obstacle_distance_fused` and `collision_constraints` for debugging
-   - Auto-loiter on prolonged data timeout (5s)
-   - Mavlink warnings on sensor data loss
-
-4. **Build tested successfully** for px4_fmu-v6xrt_default
-
-#### Parameters (CP_*)
-
-Uses standard PX4 collision prevention parameters:
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `CP_DIST` | -1 (disabled) | Minimum distance to obstacles. Set > 0 to enable |
-| `CP_DELAY` | 0.4 s | Sensor delay compensation |
-| `CP_GUIDE_ANG` | 30 deg | Guidance angle to steer around obstacles |
-| `CP_GO_NO_DATA` | 0 (disabled) | Allow movement without sensor data |
-
-#### Usage
-
-To enable collision prevention on a rover:
-1. Set `CP_DIST` to desired minimum distance (e.g., 1.0 m)
-2. Configure distance sensors or obstacle_distance source
-3. Optionally adjust `CP_DELAY`, `CP_GUIDE_ANG`, `CP_GO_NO_DATA`
-
-#### Notes
-
-- Rear obstacle detection not implemented (forward only)
-- Mecanum uses speed limiting only, no yaw guidance
-- `CP_GO_NO_DATA=0` is the default - rover stops if no sensor data
+| Module | Path | Type |
+|--------|------|------|
+| Ackermann | `src/modules/rover_ackermann/` | Car-like steering |
+| Differential | `src/modules/rover_differential/` | Skid-steer |
+| Mecanum | `src/modules/rover_mecanum/` | Omnidirectional |
 
 ---
 
 ## Changelog
 
-### pxlabs-v1.17.0-r1 (Current Stable)
+### pxlabs-v1.17.0-r1 — 2026-05-24 (Current Stable)
 
-- Based on PX4 v1.17.0 upstream
-- All PX4 v1.17.0 upstream fixes and improvements
-- Custom V6XRT sensor configurations preserved (SPI bus + rotation corrections)
-- Optical flow support enabled (`CONFIG_COMMON_OPTICAL_FLOW`)
-- Rover modules enabled in default build (Ackermann, Differential)
-- DDS rover pub/sub topics updated (rover_throttle_setpoint, rover_steering_setpoint, input_rc)
-- ist8310 external compass disabled (not used on custom V6XRT build)
-- Zenoh middleware included (new in v1.17.0 upstream default)
-- NO collision prevention (stable release — will follow in r2-Beta)
+- Rebased onto PX4 v1.17.0 upstream
+- All PX4 v1.17.0 improvements included (Zenoh default, RC deadzone, MAVLink v2 default, barometer auto-cal)
+- V6XRT sensor SPI bus/rotation corrections preserved for all 3 hardware variants
+- Optical flow enabled in default build
+- Rover Ackermann + Differential modules enabled in default build
+- DDS publications added: `input_rc`, `rover_throttle_setpoint`, `rover_steering_setpoint`
+- ist8310 external compass disabled
+- No collision prevention (stable — planned for pxlabs-v1.17.0-r2-Beta)
 
 ### pxlabs-v1.16.1-r2-Beta
 
-- Based on pxlabs-v1.16.1-r1
-- Added rover collision prevention for all rover types (Ackermann, Differential, Mecanum)
-- **WARNING: Collision prevention NOT YET TESTED**
+- Rover collision prevention for Ackermann, Differential, Mecanum
+- Uses standard PX4 `CP_*` parameters
+- **WARNING: Not yet tested on hardware**
 
-### pxlabs-v1.16.1-r1 (Previous Stable)
+### pxlabs-v1.16.1-r1 — Previous Stable
 
-- Based on pxlabs-v1.16.0-r1 + PX4 v1.16.1 upstream fixes
-- All PX4 v1.16.1 bug fixes (RTL, GPS, sensors, MAVLink)
-- Custom V6XRT sensor configurations preserved
-- NO collision prevention (stable release)
+- Based on PX4 v1.16.1 upstream
+- All PX4 v1.16.1 bug fixes
+- V6XRT sensor configuration corrections
+- No collision prevention
 
-### pxlabs-v1.16.0-r1
+### pxlabs-v1.16.0-r1 — Initial Release
 
-- Initial fork from PX4 v1.16.0
-- Added Ackermann steering rover support
-- Added differential drive rover support
-- Updated DDS configuration for rover platforms
-- Custom driver updates
+- First PXLABS fork from PX4 v1.16.0
+- Ackermann and Differential rover support
+- DDS topic updates for rover platforms
+- Custom V6XRT driver corrections
 
 ---
 
