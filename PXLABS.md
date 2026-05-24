@@ -306,6 +306,90 @@ git apply --3way pxlabs/PXLABS_V6XRT_CUSTOM.patch
 
 ---
 
+## Verified Hardware Status — NXP FMU-V6XRT (pxlabs-v1.17.0-r1)
+
+Live `work_queue status` output captured from hardware running pxlabs-v1.17.0-r1 — confirms all PXLABS sensor corrections are working correctly.
+
+### Sensor Verification
+
+| Bus | Driver | Rate | Status |
+|-----|--------|------|--------|
+| SPI1 | `icm42688p` | 395.5 Hz | ✓ Confirmed (PXLABS fix: was ICM42686P in upstream) |
+| SPI2 | `icm45686` | 400.0 Hz | ✓ Confirmed (PXLABS fix: was ICM42688P in upstream) |
+| SPI3 | `bmi088_accel` | 400.0 Hz | ✓ Confirmed (PXLABS fix: bus 3, rotation 12) |
+| SPI3 | `bmi088_gyro` | 400.8 Hz | ✓ Confirmed (PXLABS fix: bus 3, rotation 12) |
+| I2C3 | `bmm350` | 50.0 Hz | ✓ Confirmed (PXLABS addition) |
+| I2C2/I2C3 | `bmp390` | 23.1 Hz | ✓ Running (barometer) |
+| I2C1/I2C2 | `ina228` | 2.0 Hz | ✓ Running (power monitor) |
+
+### Rover & Control Verification
+
+| Module | Rate | Status |
+|--------|------|--------|
+| `rover_differential` | 100.0 Hz | ✓ Running on wq:rate_ctrl |
+| `vehicle_angular_velocity` | 400.0 Hz | ✓ Running |
+| `ekf2` | 200.0 Hz | ✓ Running |
+| `vehicle_imu` (×3) | 197–274 Hz | ✓ All 3 IMUs active |
+| `vehicle_magnetometer` | 50.0 Hz | ✓ Running |
+| `vehicle_gps_position` | 3.3 Hz | ✓ Running |
+
+### Full work_queue Output (Reference)
+
+```
+Work Queue: 12 threads                          RATE        INTERVAL
+|__ 1) wq:rate_ctrl
+|   |__ 1) pwm_out                           20.0 Hz        49997 us
+|   |__ 2) rover_differential               100.0 Hz        10000 us (10000 us)
+|   \__ 3) vehicle_angular_velocity         400.0 Hz         2500 us
+|__ 2) wq:SPI1
+|   \__ 1) icm42688p                        395.5 Hz         2528 us
+|__ 3) wq:SPI2
+|   \__ 1) icm45686                         400.0 Hz         2500 us (2500 us)
+|__ 4) wq:SPI3
+|   |__ 1) bmi088_accel                     400.0 Hz         2500 us (2500 us)
+|   \__ 2) bmi088_gyro                      400.9 Hz         2495 us
+|__ 5) wq:I2C1
+|   \__ 1) ina228                             2.0 Hz       501415 us
+|__ 6) wq:I2C2
+|   |__ 1) bmp390                            23.1 Hz        43295 us (43300 us)
+|   \__ 2) ina228                             2.0 Hz       500138 us
+|__ 7) wq:I2C3
+|   |__ 1) bmm350                            50.0 Hz        19998 us (20000 us)
+|   \__ 2) bmp390                            23.1 Hz        43299 us (43300 us)
+|__ 8) wq:nav_and_controllers
+|   |__ 1) land_detector                    100.0 Hz        10000 us
+|   |__ 2) sensors                          200.0 Hz         5000 us
+|   |__ 3) vehicle_acceleration             200.0 Hz         5000 us
+|   |__ 4) vehicle_air_data                  23.1 Hz        43298 us
+|   |__ 5) vehicle_gps_position               3.3 Hz       299671 us
+|   \__ 6) vehicle_magnetometer              50.0 Hz        19999 us
+|__ 9) wq:INS0
+|   |__ 1) ekf2                             200.0 Hz         5000 us
+|   |__ 2) vehicle_imu                      197.8 Hz         5057 us
+|   |__ 3) vehicle_imu                      200.0 Hz         5000 us
+|   \__ 4) vehicle_imu                      274.0 Hz         3650 us
+|__ 10) wq:hp_default
+|   |__ 1) battery_status                   100.0 Hz        10000 us
+|   |__ 2) board_adc                        100.0 Hz        10001 us (10000 us)
+|   |__ 3) manual_control                     5.0 Hz       199895 us
+|   |__ 4) rc_update                          0.0 Hz            0 us
+|   |__ 5) safety_button                     30.3 Hz        33001 us (33000 us)
+|   \__ 6) tone_alarm                         0.0 Hz            0 us
+|__ 11) wq:uavcan
+|   |__ 1) uavcan                           333.2 Hz         3001 us (3000 us)
+|   |__ 2) uavcan-actuators-esc              20.0 Hz        50002 us
+|   \__ 3) uavcan-actuators-servo             3.3 Hz       299567 us (300000 us)
+\__ 12) wq:lp_default
+    |__ 1) cdcacm_autostart                   2.0 Hz       499933 us
+    |__ 2) gyro_calibration                  49.9 Hz        20036 us (20000 us)
+    |__ 3) load_mon                           2.0 Hz       499871 us (500000 us)
+    |__ 4) mag_bias_estimator                49.9 Hz        20036 us (20000 us)
+    |__ 5) parameters                         0.0 Hz            0 us
+    \__ 6) send_event                        29.9 Hz        33391 us (33333 us)
+```
+
+---
+
 ## Rover Controllers
 
 | Module | Path | Type |
