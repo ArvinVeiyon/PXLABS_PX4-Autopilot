@@ -9,22 +9,25 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 | Property | Value |
 |----------|-------|
 | Latest Stable | `pxlabs-v1.17.0-r1` |
+| Latest Stable Tag | `pxlabs-v1.17.0-r1` (2026-05-24) |
 | Latest Beta | - |
 | Development | `pxlabs-v1.17.0-dev` |
 | Upstream Base | PX4 v1.17.0 |
 | Target Board | NXP FMU-V6XRT |
+| Hardware Verified | Yes — 2026-05-24 |
 | Upstream Repo | https://github.com/PX4/PX4-Autopilot |
 | Maintainer | PXLABS |
 
-## Branch Structure
+## Branch & Tag Structure
 
-| Branch | Description |
-|--------|-------------|
-| `px4-v1.17.0` | Clean upstream PX4 v1.17.0 — no PXLABS changes (reference base) |
-| `pxlabs-v1.17.0-r1` | **Current stable** — PXLABS modifications on PX4 v1.17.0 |
-| `pxlabs-v1.17.0-dev` | Active development for next release |
-| `pxlabs-v1.16.1-r1` | Previous stable (PX4 v1.16.1 based) |
-| `pxlabs-v1.16.1-r2-Beta` | Previous beta — collision prevention (untested) |
+| Branch / Tag | Type | Description |
+|--------------|------|-------------|
+| `px4-v1.17.0` | Branch | Clean upstream PX4 v1.17.0 — reference base, no PXLABS changes |
+| `pxlabs-v1.17.0-r1` | Branch + Tag | **Current stable** — hardware verified 2026-05-24 |
+| `pxlabs-v1.17.0-dev` | Branch | Active development for next release |
+| `pxlabs-v1.16.1-r1` | Branch + Tag | Previous stable (PX4 v1.16.1 based) |
+| `pxlabs-v1.16.1-r2-Beta` | Branch + Tag | Previous beta — collision prevention (untested) |
+| `pxlabs-v1.16.0-r1` | Branch + Tag | Initial release archive |
 
 ## PXLABS Modifications (v1.17.0)
 
