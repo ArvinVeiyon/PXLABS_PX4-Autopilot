@@ -1,7 +1,7 @@
 # Onboard parameters for Vehicle 1
 #
 # Stack: PX4 Pro
-# Vehicle: Ground rover (NXP FMU-V6XRT)
+# Vehicle: Differential Rover (NXP FMU-V6XRT)
 # Version: pxlabs-v1.17.0-r1
 # Date: 2026-05-24
 # Tested: Yes (pxlabs-v1.16.1-r1 base)
