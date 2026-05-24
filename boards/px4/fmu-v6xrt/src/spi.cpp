@@ -43,12 +43,17 @@
 
 constexpr px4_spi_bus_all_hw_t px4_spi_buses_all_hw[BOARD_NUM_SPI_CFG_HW_VERSIONS] = {
 	initSPIFmumID(V6XRT_0, {
+
 		initSPIBus(SPI::Bus::LPSPI1, {
-			initSPIDevice(DRV_IMU_DEVTYPE_ICM42686P, SPI::CS{GPIO::Port2, GPIO::Pin11}, SPI::DRDY{GPIO::Port3, GPIO::Pin19}), /* GPIO_EMC_B2_01 GPIO2_IO11, GPIO_AD_20, GPIO3_IO19 */
+			/* [PXLABS] Corrected: ICM42688P (was ICM42686P upstream) */
+			initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::Port2, GPIO::Pin11}, SPI::DRDY{GPIO::Port3, GPIO::Pin19}), /* GPIO_EMC_B2_01 GPIO2_IO11, GPIO_AD_20, GPIO3_IO19 */
+			/* [UPSTREAM] initSPIDevice(DRV_IMU_DEVTYPE_ICM42686P, ...) */
 		}, {GPIO::Port2, GPIO::Pin1}), // Power GPIO_EMC_B1_33  GPIO2_IO01
 
 		initSPIBus(SPI::Bus::LPSPI2, {
-			initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::Port3, GPIO::Pin24}, SPI::DRDY{GPIO::Port2, GPIO::Pin7}), /* GPIO_AD_25 GPIO3_IO24, GPIO_EMC_B1_39 GPIO2_IO07 */
+			/* [PXLABS] Corrected: ICM45686 on bus 2 (was ICM42688P upstream) */
+			initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::Port3, GPIO::Pin24}, SPI::DRDY{GPIO::Port2, GPIO::Pin7}), /* GPIO_AD_25 GPIO3_IO24, GPIO_EMC_B1_39 GPIO2_IO07 */
+			/* [UPSTREAM] initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, ...) */
 		}, {GPIO::Port1, GPIO::Pin22}), // Power GPIO_EMC_B1_22  GPIO1_IO22
 
 		initSPIBus(SPI::Bus::LPSPI3, {
@@ -64,11 +69,15 @@ constexpr px4_spi_bus_all_hw_t px4_spi_buses_all_hw[BOARD_NUM_SPI_CFG_HW_VERSION
 
 	initSPIFmumID(V6XRT_1, {
 		initSPIBus(SPI::Bus::LPSPI1, {
-			initSPIDevice(DRV_IMU_DEVTYPE_ICM42686P, SPI::CS{GPIO::Port2, GPIO::Pin11}, SPI::DRDY{GPIO::Port3, GPIO::Pin19}), /* GPIO_EMC_B2_01 GPIO2_IO11, GPIO_AD_20, GPIO3_IO19 */
+			/* [PXLABS] Corrected: ICM42688P (was ICM42686P upstream) */
+			initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::Port2, GPIO::Pin11}, SPI::DRDY{GPIO::Port3, GPIO::Pin19}), /* GPIO_EMC_B2_01 GPIO2_IO11, GPIO_AD_20, GPIO3_IO19 */
+			/* [UPSTREAM] initSPIDevice(DRV_IMU_DEVTYPE_ICM42686P, ...) */
 		}, {GPIO::Port2, GPIO::Pin1}), // Power GPIO_EMC_B1_33  GPIO2_IO01
 
 		initSPIBus(SPI::Bus::LPSPI2, {
-			initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::Port3, GPIO::Pin24}, SPI::DRDY{GPIO::Port2, GPIO::Pin7}), /* GPIO_AD_25 GPIO3_IO24, GPIO_EMC_B1_39 GPIO2_IO07 */
+			/* [PXLABS] Corrected: ICM45686 on bus 2 (was ICM42688P upstream) */
+			initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::Port3, GPIO::Pin24}, SPI::DRDY{GPIO::Port2, GPIO::Pin7}), /* GPIO_AD_25 GPIO3_IO24, GPIO_EMC_B1_39 GPIO2_IO07 */
+			/* [UPSTREAM] initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, ...) */
 		}, {GPIO::Port1, GPIO::Pin22}), // Power GPIO_EMC_B1_22  GPIO1_IO22
 
 		initSPIBus(SPI::Bus::LPSPI3, {
@@ -84,7 +93,9 @@ constexpr px4_spi_bus_all_hw_t px4_spi_buses_all_hw[BOARD_NUM_SPI_CFG_HW_VERSION
 
 	initSPIFmumID(V6XRT_2, {
 		initSPIBus(SPI::Bus::LPSPI1, {
-			initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::Port2, GPIO::Pin11}, SPI::DRDY{GPIO::Port3, GPIO::Pin19}), /* GPIO_EMC_B2_01 GPIO2_IO11, GPIO_AD_20, GPIO3_IO19 */
+			/* [PXLABS] Corrected: ICM42688P on bus 1 (was ICM45686 upstream) */
+			initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::Port2, GPIO::Pin11}, SPI::DRDY{GPIO::Port3, GPIO::Pin19}), /* GPIO_EMC_B2_01 GPIO2_IO11, GPIO_AD_20, GPIO3_IO19 */
+			/* [UPSTREAM] initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, ...) */
 		}, {GPIO::Port2, GPIO::Pin1}), // Power GPIO_EMC_B1_33  GPIO2_IO01
 
 		initSPIBus(SPI::Bus::LPSPI2, {

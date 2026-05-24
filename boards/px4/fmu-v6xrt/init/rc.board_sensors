@@ -84,12 +84,18 @@ then
 	# Internal SPI bus ICM42686p (hard-mounted)
 	icm42688p -6 -R 12 -b 1 -s start
 
-	# Internal on IMU SPI BMI088
-	bmi088 -A -R 4 -s start
-	bmi088 -G -R 4 -s start
+	# [PXLABS] BMI088 on SPI bus 3 with corrected rotation 12
+	bmi088 -A -R 12 -s -b 3 start
+	bmi088 -G -R 12 -s -b 3 start
+	# [UPSTREAM] bmi088 -A -R 4 -s start
+	# [UPSTREAM] bmi088 -G -R 4 -s start
 
-	# Internal on IMU SPI bus ICM42688p
-	icm42688p -R 6 -b 2 -s start
+	# [PXLABS] ICM45686 on SPI bus 2 with rotation 10
+	icm45686 -R 10 -b 2 -s start
+	# [UPSTREAM] icm42688p -R 6 -b 2 -s start
+
+	# [PXLABS] Second ICM42688p on SPI bus 1
+	icm42688p -R 12 -b 1 -s start
 fi
 
 if ver hwtypecmp V6XRT002
@@ -97,18 +103,26 @@ then
 	# Internal SPI bus icm45686 (hard-mounted)
 	icm45686 -R 12 -b 1 -s start
 
-	# Internal on IMU SPI BMI088
-	bmi088 -A -R 4 -s start
-	bmi088 -G -R 4 -s start
+	# [PXLABS] BMI088 on SPI bus 3 with corrected rotation 12
+	bmi088 -A -R 12 -s -b 3 start
+	bmi088 -G -R 12 -s -b 3 start
+	# [UPSTREAM] bmi088 -A -R 4 -s start
+	# [UPSTREAM] bmi088 -G -R 4 -s start
 
-	# Internal on IMU SPI bus icm45686
-	icm45686 -R 6 -b 2 -s start
+	# [PXLABS] ICM45686 on SPI bus 2 with rotation 10
+	icm45686 -R 10 -b 2 -s start
+	# [UPSTREAM] icm45686 -R 6 -b 2 -s start
+
+	# [PXLABS] ICM42688P on SPI bus 1
+	icm42688p -R 12 -b 1 -s start
 fi
 
 if ver hwtypecmp V6XRT000
 then
 	# Internal magnetometer on I2c
 	bmm150 -I start
+	# [PXLABS] Also start BMM350 on V6XRT000
+	bmm350 -I start
 fi
 
 if ver hwtypecmp V6XRT001 V6XRT002
@@ -118,7 +132,8 @@ then
 fi
 
 # External compass on GPS1/I2C1 (the 3rd external bus): standard Holybro Pixhawk 4 or CUAV V5 GPS/compass puck (with lights, safety button, and buzzer)
-ist8310 -X -b 1 -R 10 start
+# [PXLABS] Disabled - not used on V6XRT custom build
+# [UPSTREAM] ist8310 -X -b 1 -R 10 start
 
 # Possible internal Baro
 

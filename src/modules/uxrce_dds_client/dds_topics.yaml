@@ -8,6 +8,10 @@ publications:
   - topic: /fmu/out/register_ext_component_reply
     type: px4_msgs::msg::RegisterExtComponentReply
 
+  # [PXLABS] RC input telemetry for rover monitoring
+  - topic: /fmu/out/input_rc
+    type: px4_msgs::msg::InputRc
+
   - topic: /fmu/out/arming_check_request
     type: px4_msgs::msg::ArmingCheckRequest
     rate_limit: 5.
@@ -99,6 +103,13 @@ publications:
   - topic: /fmu/out/home_position
     type: px4_msgs::msg::HomePosition
     rate_limit: 5.
+
+  # [PXLABS] Rover setpoint feedback publications
+  - topic: /fmu/out/rover_throttle_setpoint
+    type: px4_msgs::msg::RoverThrottleSetpoint
+
+  - topic: /fmu/out/rover_steering_setpoint
+    type: px4_msgs::msg::RoverSteeringSetpoint
 
   - topic: /fmu/out/wind
     type: px4_msgs::msg::Wind
