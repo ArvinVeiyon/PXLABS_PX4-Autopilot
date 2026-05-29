@@ -168,6 +168,7 @@ pxlabs/
 
 | File | Vehicle | Status | Date |
 |------|---------|--------|------|
+| [`PXlabs_Differential_Rover_NXP_tested_2026-05-29.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-05-29.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-05-29 |
 | [`PXlabs_Differential_Rover_NXP_tested_2026-05-24.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-05-24.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-05-24 |
 
 To load parameters: open QGroundControl → Vehicle Setup → Parameters → Tools → Load from file.
@@ -183,7 +184,7 @@ Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 
 ### Pre-compiled Firmware
 
-Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
+Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-29.
 
 | File | Path | Size | Description |
 |------|------|------|-------------|
@@ -192,7 +193,7 @@ Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 | ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` | 57 MB | For GDB debugging |
 | Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` | 11 MB | Symbol map |
 
-Flash usage: **61.80%** flash · **85.42%** ITCM · **5.39%** SRAM
+Flash usage: **61.90%** flash · **85.42%** ITCM · **5.39%** SRAM
 
 ### Setup Documents
 
@@ -404,6 +405,12 @@ Work Queue: 12 threads                          RATE        INTERVAL
 ---
 
 ## Changelog
+
+### pxlabs-v1.17.0-dev — 2026-05-29 (Development)
+
+- Added DDS publication: `/fmu/out/esc_status` — enables VESC UAVCAN motor RPM/current telemetry on companion computer for wheel odometry and autonomous navigation
+- Firmware rebuilt: flash 61.90% (+0.10% from r1)
+- New tested parameter file: `PXlabs_Differential_Rover_NXP_tested_2026-05-29.params`
 
 ### pxlabs-v1.17.0-r1 — 2026-05-24 (Current Stable)
 

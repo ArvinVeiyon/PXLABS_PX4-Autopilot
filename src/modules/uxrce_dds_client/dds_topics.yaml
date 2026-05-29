@@ -105,6 +105,9 @@ publications:
     rate_limit: 5.
 
   # [PXLABS] Rover setpoint feedback publications
+  - topic: /fmu/out/esc_status
+    type: px4_msgs::msg::EscStatus
+
   - topic: /fmu/out/rover_throttle_setpoint
     type: px4_msgs::msg::RoverThrottleSetpoint
 
