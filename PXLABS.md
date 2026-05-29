@@ -10,7 +10,7 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 |----------|-------|
 | Latest Stable | `pxlabs-v1.17.0-r1` |
 | Latest Stable Tag | `pxlabs-v1.17.0-r1` (2026-05-24) |
-| Latest Beta | - |
+| Latest Beta | `pxlabs-v1.17.0-r2-Beta` (2026-05-29) |
 | Development | `pxlabs-v1.17.0-dev` |
 | Upstream Base | PX4 v1.17.0 |
 | Target Board | NXP FMU-V6XRT |
@@ -24,6 +24,7 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 |--------------|------|-------------|
 | `px4-v1.17.0` | Branch | Clean upstream PX4 v1.17.0 — reference base, no PXLABS changes |
 | `pxlabs-v1.17.0-r1` | Branch + Tag | **Current stable** — hardware verified 2026-05-24 |
+| `pxlabs-v1.17.0-r2-Beta` | Tag | **Latest beta** — esc_status DDS, OEM version string 2026-05-29 |
 | `pxlabs-v1.17.0-dev` | Branch | Active development for next release |
 | `pxlabs-v1.16.1-r1` | Branch + Tag | Previous stable (PX4 v1.16.1 based) |
 | `pxlabs-v1.16.1-r2-Beta` | Branch + Tag | Previous beta — collision prevention (untested) |
@@ -406,10 +407,11 @@ Work Queue: 12 threads                          RATE        INTERVAL
 
 ## Changelog
 
-### pxlabs-v1.17.0-dev — 2026-05-29 (Development)
+### pxlabs-v1.17.0-r2-Beta — 2026-05-29 (Beta)
 
 - Added DDS publication: `/fmu/out/esc_status` — enables VESC UAVCAN motor RPM/current telemetry on companion computer for wheel odometry and autonomous navigation
 - Firmware rebuilt: flash 61.90% (+0.10% from r1)
+- OEM version string baked in: `pxlabs-v1.17.0-r2-Beta` (visible in QGroundControl)
 - New tested parameter file: `PXlabs_Differential_Rover_NXP_tested_2026-05-29.params`
 
 ### pxlabs-v1.17.0-r1 — 2026-05-24 (Current Stable)
