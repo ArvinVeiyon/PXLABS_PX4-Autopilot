@@ -8,8 +8,7 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 
 | Property | Value |
 |----------|-------|
-| Latest Stable | `pxlabs-v1.17.0-r1` |
-| Latest Stable Tag | `pxlabs-v1.17.0-r1` (2026-05-24) |
+| Latest Release | `v1.17.0-2.0.0` (2026-05-31) |
 | Latest Beta | `pxlabs-v1.17.0-r2-Beta` (2026-05-29) |
 | Development | `pxlabs-v1.17.0-dev` |
 | Upstream Base | PX4 v1.17.0 |
@@ -18,13 +17,31 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 | Upstream Repo | https://github.com/PX4/PX4-Autopilot |
 | Maintainer | PXLABS |
 
+## Version Naming Convention
+
+PXLABS uses two parallel tag schemes:
+
+| Tag Format | Example | Purpose |
+|------------|---------|---------|
+| `pxlabs-v<px4>-r<N>[-Beta]` | `pxlabs-v1.17.0-r2-Beta` | Internal PXLABS release identifier |
+| `v<px4>-<major>.<minor>.<patch>` | `v1.17.0-2.0.0` | QGC-parseable tag — controls **Custom Fw. Ver.** display |
+| `<px4>.<major>.<minor>.<patch>` | `1.17.0.2.0` | Numeric release reference tag |
+
+> **How QGC version display works:** PX4's cmake picks up the nearest `v*` git tag at configure time and bakes it into the firmware. QGC reads the custom version part (after `v1.17.0-`) and displays it as **Custom Fw. Ver.**
+> - Tag `v1.17.0-2.0.0` → QGC shows `2.0.0`
+> - Tag `v1.17.0-2.0.0-beta1` → QGC shows `2.0.0 (beta)`
+> No source code changes are needed — version display is purely tag-driven.
+
 ## Branch & Tag Structure
 
 | Branch / Tag | Type | Description |
 |--------------|------|-------------|
 | `px4-v1.17.0` | Branch | Clean upstream PX4 v1.17.0 — reference base, no PXLABS changes |
-| `pxlabs-v1.17.0-r1` | Branch + Tag | **Current stable** — hardware verified 2026-05-24 |
-| `pxlabs-v1.17.0-r2-Beta` | Tag | **Latest beta** — esc_status DDS, OEM version string 2026-05-29 |
+| `pxlabs-v1.17.0-r1` | Branch + Tag | Stable release 1 — hardware verified 2026-05-24 |
+| `pxlabs-v1.17.0-r2-Beta` | Tag | Beta release 2 — esc_status DDS, tested 2026-05-29 |
+| `v1.17.0-2.0.0` | Tag | **Latest release** — QGC shows `2.0.0` (2026-05-31) |
+| `1.17.0.2.0` | Tag | Numeric alias for release 2.0.0 |
+| `pxlabs-v1.17.0-2.0.0` | Branch | Release branch for v2.0.0 |
 | `pxlabs-v1.17.0-dev` | Branch | Active development for next release |
 | `pxlabs-v1.16.1-r1` | Branch + Tag | Previous stable (PX4 v1.16.1 based) |
 | `pxlabs-v1.16.1-r2-Beta` | Branch + Tag | Previous beta — collision prevention (untested) |
@@ -120,19 +137,15 @@ bash ./Tools/setup/ubuntu.sh
 # Firmware for NXP FMU-V6XRT
 make px4_fmu-v6xrt_default
 
-# Rover-only firmware (Ackermann + Differential + Mecanum)
-make px4_fmu-v6xrt_rover
-
 # Bootloader
 make px4_fmu-v6xrt_bootloader
 
 # Upload via USB
 make px4_fmu-v6xrt_default upload
 
-# SITL simulation
-make px4_sitl gazebo
-make px4_sitl gazebo_rover
-make px4_sitl gazebo_rover_ackermann
+# SITL simulation (Gazebo headless + separate GUI)
+make px4_sitl gz_rover_differential   # launches PX4 + Gazebo server
+gz sim -g                             # launch Gazebo GUI separately
 
 # List all targets
 make list_config_targets
@@ -185,7 +198,7 @@ Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 
 ### Pre-compiled Firmware
 
-Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-29.
+Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-31 (v1.17.0-2.0.0).
 
 | File | Path | Size | Description |
 |------|------|------|-------------|
@@ -407,11 +420,16 @@ Work Queue: 12 threads                          RATE        INTERVAL
 
 ## Changelog
 
+### v1.17.0-2.0.0 — 2026-05-31 (Latest Release)
+
+- QGC **Custom Fw. Ver.** displays `2.0.0` — driven purely by git tag, no source changes
+- Based on exact `pxlabs-v1.17.0-r2-Beta` source — zero additional code modifications
+- Firmware stats: flash 61.90% · ITCM 85.42% · SRAM 5.39%
+
 ### pxlabs-v1.17.0-r2-Beta — 2026-05-29 (Beta)
 
-- Added DDS publication: `/fmu/out/esc_status` — enables VESC UAVCAN motor RPM/current telemetry on companion computer for wheel odometry and autonomous navigation
+- Added DDS publication: `/fmu/out/esc_status` — VESC UAVCAN motor RPM/current telemetry for companion wheel odometry
 - Firmware rebuilt: flash 61.90% (+0.10% from r1)
-- OEM version string baked in: `pxlabs-v1.17.0-r2-Beta` (visible in QGroundControl)
 - New tested parameter file: `PXlabs_Differential_Rover_NXP_tested_2026-05-29.params`
 
 ### pxlabs-v1.17.0-r1 — 2026-05-24 (Current Stable)
