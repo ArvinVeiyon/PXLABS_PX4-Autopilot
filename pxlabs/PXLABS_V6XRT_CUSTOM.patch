@@ -141,7 +141,7 @@ index 01abdfb8c9..e8ac10ba45 100644
  
  		initSPIBus(SPI::Bus::LPSPI2, {
 diff --git a/src/modules/uxrce_dds_client/dds_topics.yaml b/src/modules/uxrce_dds_client/dds_topics.yaml
-index 7cc39d199c..8c50b5f326 100644
+index 7cc39d199c..b284acb8e3 100644
 --- a/src/modules/uxrce_dds_client/dds_topics.yaml
 +++ b/src/modules/uxrce_dds_client/dds_topics.yaml
 @@ -8,6 +8,10 @@ publications:
@@ -155,11 +155,14 @@ index 7cc39d199c..8c50b5f326 100644
    - topic: /fmu/out/arming_check_request
      type: px4_msgs::msg::ArmingCheckRequest
      rate_limit: 5.
-@@ -100,6 +104,13 @@ publications:
+@@ -100,6 +104,16 @@ publications:
      type: px4_msgs::msg::HomePosition
      rate_limit: 5.
  
 +  # [PXLABS] Rover setpoint feedback publications
++  - topic: /fmu/out/esc_status
++    type: px4_msgs::msg::EscStatus
++
 +  - topic: /fmu/out/rover_throttle_setpoint
 +    type: px4_msgs::msg::RoverThrottleSetpoint
 +

@@ -8,7 +8,7 @@ This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/P
 
 | Property | Value |
 |----------|-------|
-| Latest Release | `v1.17.0-2.0.0` (2026-05-31) |
+| Latest Release | `v1.17.0-2.1.0` (2026-08-15) |
 | Latest Beta | `pxlabs-v1.17.0-r2-Beta` (2026-05-29) |
 | Development | `pxlabs-v1.17.0-dev` |
 | Upstream Base | PX4 v1.17.0 |
@@ -39,7 +39,10 @@ PXLABS uses two parallel tag schemes:
 | `px4-v1.17.0` | Branch | Clean upstream PX4 v1.17.0 — reference base, no PXLABS changes |
 | `pxlabs-v1.17.0-r1` | Branch + Tag | Stable release 1 — hardware verified 2026-05-24 |
 | `pxlabs-v1.17.0-r2-Beta` | Tag | Beta release 2 — esc_status DDS, tested 2026-05-29 |
-| `v1.17.0-2.0.0` | Tag | **Latest release** — QGC shows `2.0.0` (2026-05-31) |
+| `v1.17.0-2.1.0` | Tag | **Latest release** — QGC shows `2.1.0` (2026-08-15) |
+| `1.17.0.2.1` | Tag | Numeric alias for release 2.1.0 |
+| `pxlabs-v1.17.0-2.1.0` | Branch | Release branch for v2.1.0 |
+| `v1.17.0-2.0.0` | Tag | Previous release — QGC shows `2.0.0` (2026-05-31) |
 | `1.17.0.2.0` | Tag | Numeric alias for release 2.0.0 |
 | `pxlabs-v1.17.0-2.0.0` | Branch | Release branch for v2.0.0 |
 | `pxlabs-v1.17.0-dev` | Branch | Active development for next release |
@@ -75,6 +78,11 @@ Additional changes:
 - `/fmu/out/input_rc` — RC input telemetry
 - `/fmu/out/rover_throttle_setpoint` — rover throttle feedback
 - `/fmu/out/rover_steering_setpoint` — rover steering feedback
+- `/fmu/out/esc_status` — VESC UAVCAN motor RPM/current telemetry for companion wheel odometry
+- `/fmu/out/vehicle_angular_velocity` — angular velocity feedback for rover autonomy / odometry fusion (2026-08-15)
+- `/fmu/out/rover_speed_status` — closed-loop speed controller feedback (2026-08-15)
+- `/fmu/out/rover_attitude_status` — closed-loop attitude/heading controller feedback (2026-08-15)
+- `/fmu/out/rover_rate_status` — closed-loop yaw rate controller feedback (2026-08-15)
 
 **Subscriptions (already in upstream v1.17.0):**
 - `/fmu/in/rover_position_setpoint`
@@ -198,7 +206,7 @@ Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 
 ### Pre-compiled Firmware
 
-Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-31 (v1.17.0-2.0.0).
+Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-08-15 (v1.17.0-2.1.0).
 
 | File | Path | Size | Description |
 |------|------|------|-------------|
@@ -420,7 +428,13 @@ Work Queue: 12 threads                          RATE        INTERVAL
 
 ## Changelog
 
-### v1.17.0-2.0.0 — 2026-05-31 (Latest Release)
+### v1.17.0-2.1.0 — 2026-08-15 (Latest Release)
+
+- Enabled DDS publication: `/fmu/out/vehicle_angular_velocity` — angular velocity feedback for rover autonomy / odometry fusion
+- Added DDS publications: `/fmu/out/rover_speed_status`, `/fmu/out/rover_attitude_status`, `/fmu/out/rover_rate_status` — closed-loop rover controller feedback for the autonomy stack
+- Firmware rebuilt: flash 61.90% · ITCM 85.42% · SRAM 5.39% (unchanged from 2.0.0 — DDS bridge change only)
+
+### v1.17.0-2.0.0 — 2026-05-31
 
 - QGC **Custom Fw. Ver.** displays `2.0.0` — driven purely by git tag, no source changes
 - Based on exact `pxlabs-v1.17.0-r2-Beta` source — zero additional code modifications
