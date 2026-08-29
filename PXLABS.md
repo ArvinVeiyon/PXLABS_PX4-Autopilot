@@ -4,11 +4,14 @@
 
 This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/PX4-Autopilot) maintained by **PXLABS**. It targets the **NXP FMU-V6XRT** flight controller with enhanced rover support for Ackermann, Differential, and Mecanum platforms.
 
+> See [`HARDFAULT.md`](HARDFAULT.md) for the investigation and fix behind the
+> recurring hard fault resolved in `v1.17.0-2.1.0`.
+
 ## Repository Information
 
 | Property | Value |
 |----------|-------|
-| Latest Release | `v1.17.0-2.0.0` (2026-05-31) |
+| Latest Release | `v1.17.0-2.1.0` (2026-08-29) |
 | Latest Beta | `pxlabs-v1.17.0-r2-Beta` (2026-05-29) |
 | Development | `pxlabs-v1.17.0-dev` |
 | Upstream Base | PX4 v1.17.0 |
@@ -39,7 +42,10 @@ PXLABS uses two parallel tag schemes:
 | `px4-v1.17.0` | Branch | Clean upstream PX4 v1.17.0 — reference base, no PXLABS changes |
 | `pxlabs-v1.17.0-r1` | Branch + Tag | Stable release 1 — hardware verified 2026-05-24 |
 | `pxlabs-v1.17.0-r2-Beta` | Tag | Beta release 2 — esc_status DDS, tested 2026-05-29 |
-| `v1.17.0-2.0.0` | Tag | **Latest release** — QGC shows `2.0.0` (2026-05-31) |
+| `v1.17.0-2.1.0` | Tag | **Latest release** — QGC shows `2.1.0` (2026-08-29) |
+| `1.17.0.2.1` | Tag | Numeric alias for release 2.1.0 |
+| `pxlabs-v1.17.0-2.1.0` | Branch | Release branch for v2.1.0 |
+| `v1.17.0-2.0.0` | Tag | Previous release — QGC shows `2.0.0` (2026-05-31) |
 | `1.17.0.2.0` | Tag | Numeric alias for release 2.0.0 |
 | `pxlabs-v1.17.0-2.0.0` | Branch | Release branch for v2.0.0 |
 | `pxlabs-v1.17.0-dev` | Branch | Active development for next release |
@@ -198,7 +204,7 @@ Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-24.
 
 ### Pre-compiled Firmware
 
-Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-31 (v1.17.0-2.0.0).
+Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-08-29 (v1.17.0-2.1.0).
 
 | File | Path | Size | Description |
 |------|------|------|-------------|
@@ -207,7 +213,7 @@ Built with GCC arm-none-eabi 9.3.1 on Ubuntu 24.04 — 2026-05-31 (v1.17.0-2.0.0
 | ELF (debug) | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.elf` | 57 MB | For GDB debugging |
 | Memory map | `pxlabs/PXLabs_Firmware/px4_fmu-v6xrt_default.map` | 11 MB | Symbol map |
 
-Flash usage: **61.90%** flash · **85.42%** ITCM · **5.39%** SRAM
+Flash usage: **62.01%** flash · **85.42%** ITCM · **5.50%** SRAM
 
 ### Setup Documents
 
@@ -420,7 +426,23 @@ Work Queue: 12 threads                          RATE        INTERVAL
 
 ## Changelog
 
-### v1.17.0-2.0.0 — 2026-05-31 (Latest Release)
+### v1.17.0-2.1.0 — 2026-08-29 (Latest Release)
+
+- **Fixes recurring intermittent hard fault** (`UNDEFINSTR`/`NOCP`, random ~5–15 min
+  interval, reproduced on 4 flight controllers across 2 sites) by cherry-picking
+  upstream PR [PX4/PX4-Autopilot#28141](https://github.com/PX4/PX4-Autopilot/pull/28141)
+  — calibrates the FlexSPI DLL read strobe at boot instead of trusting the ROM's
+  default "locked but not centered" placement. Root cause, investigation, and
+  verification fully documented in [`HARDFAULT.md`](HARDFAULT.md).
+- Confirmed via 8+ hour continuous hardware soak test, 2026-08-28→29: zero fault logs,
+  zero unexpected reboots.
+- Firmware stats: flash 61.80% → **62.01%** (+8664 B), SRAM 5.39% → **5.50%**
+  (+2112 B), ITCM unchanged 85.42%.
+- **Known gap:** this fix is not yet present in any current upstream v1.18 tag
+  (`alpha1`/`beta1`/`beta2` all predate the PR) — see `HARDFAULT.md` for what to check
+  before ever building from a v1.18 base.
+
+### v1.17.0-2.0.0 — 2026-05-31
 
 - QGC **Custom Fw. Ver.** displays `2.0.0` — driven purely by git tag, no source changes
 - Based on exact `pxlabs-v1.17.0-r2-Beta` source — zero additional code modifications
