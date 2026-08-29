@@ -5,7 +5,7 @@
 This repository is a customized fork of [PX4-Autopilot](https://github.com/PX4/PX4-Autopilot) maintained by **PXLABS**. It targets the **NXP FMU-V6XRT** flight controller with enhanced rover support for Ackermann, Differential, and Mecanum platforms.
 
 > See [`HARDFAULT.md`](HARDFAULT.md) for the investigation and fix behind the
-> recurring hard fault resolved in `v1.17.0-2.1.0`.
+> recurring hard fault addressed in `v1.17.0-2.1.0` (soak test in progress).
 
 ## Repository Information
 
@@ -432,14 +432,16 @@ Work Queue: 12 threads                          RATE        INTERVAL
 
 ### v1.17.0-2.1.0 — 2026-08-29 (Latest Release)
 
-- **Fixes recurring intermittent hard fault** (`UNDEFINSTR`/`NOCP`, random ~5–15 min
+- **Addresses recurring intermittent hard fault** (`UNDEFINSTR`/`NOCP`, random ~5–15 min
   interval, reproduced on 4 flight controllers across 2 sites) by cherry-picking
   upstream PR [PX4/PX4-Autopilot#28141](https://github.com/PX4/PX4-Autopilot/pull/28141)
   — calibrates the FlexSPI DLL read strobe at boot instead of trusting the ROM's
-  default "locked but not centered" placement. Root cause, investigation, and
-  verification fully documented in [`HARDFAULT.md`](HARDFAULT.md).
-- Confirmed via 8+ hour continuous hardware soak test, 2026-08-28→29: zero fault logs,
-  zero unexpected reboots.
+  default "locked but not centered" placement. Root cause, investigation, and live
+  soak-test status tracked in [`HARDFAULT.md`](HARDFAULT.md).
+- **Soak test in progress, on track but not yet instrument-confirmed at time of
+  release**: as of 2026-08-29 08:55 IST, 7.74h continuous uptime, zero fault logs,
+  zero reboots, on pace to clear the 8h pass bar shortly after. See `HARDFAULT.md` for
+  why this campaign insists on an instrument-counted 8h rather than an operator call.
 - Firmware stats: flash 61.80% → **62.01%** (+8664 B), SRAM 5.39% → **5.50%**
   (+2112 B), ITCM unchanged 85.42%.
 - **Known gap:** this fix is not yet present in any current upstream v1.18 tag
