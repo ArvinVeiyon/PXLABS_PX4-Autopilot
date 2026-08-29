@@ -1,9 +1,10 @@
 # Hard Fault Investigation — NXP FMU-V6XRT
 
-**Status: SOAK IN PROGRESS, ON TRACK — 2026-08-29** (see "Soak test evidence" below —
-this campaign has walked back three prior "fixed" calls that were declared on a quiet
-window shorter than the required bar, so this doc deliberately does not say RESOLVED
-until an instrument-counted run clears it)
+**Status: RESOLVED (soak-confirmed) — 2026-08-29**, with two pieces of evidence still
+open — see "Soak test evidence" and "What's still open" below. This campaign has
+walked back three prior "fixed" calls declared on a quiet window shorter than the
+required bar, so this document only moved to RESOLVED once an instrument-counted run
+actually cleared it, not on elapsed wall-clock time or an operator call.
 
 ## Summary
 
@@ -16,9 +17,8 @@ close to the edge of the valid data window instead of its center, producing occa
 corrupted instruction fetches under load/thermal/voltage variation. The fix is
 cherry-picking upstream PX4 **PR [#28141](https://github.com/PX4/PX4-Autopilot/pull/28141)**
 ("feat(fmu-v6xrt): calibrate FlexSPI DLL read strobe at boot"), authored by NXP engineer
-Peter van der Perk. A continuous instrument-counted soak test with the fix applied is
-in progress and on track to clear the 8h pass bar (see below for the exact numbers) —
-treat this as strong, not yet final, evidence.
+Peter van der Perk. A continuous instrument-counted soak test with the fix applied
+**cleared the 8h pass bar clean** on 2026-08-29 (see below for the exact numbers).
 
 ## Symptom
 
@@ -121,18 +121,34 @@ signature (`UNDEFINSTR`, garbage PC, load-dependent) that #28141 also resolved.
 
 Continuous measurement via `~/ros2_ws/tools/fc_soak.py` on the companion's board:
 
-- Single boot at 2026-08-29 01:11:01, **zero reboots since**
-- As of 2026-08-29 08:55 IST: **464.5 min (7.74h) uptime, 0 new fault logs**, SD-card
-  fault baseline still 0 since soak start, real load running throughout (camera,
-  `/scan`, `/scan_3d`, wheel odometry, uXRCE-DDS all up), `throttled=0x0`, 51°C
-- The 8h pass bar (480 min) is reached at ~09:11 IST on this boot — **on track, but not
-  yet crossed as of the last confirmed reading.** This bar exists because the fault
-  era's own measured statistics put P(quiet ≥8h | bug still present) at 0% — so
-  clearing it is treated as confirmation, not coincidence — but three earlier fixes in
-  this campaign (charger, USB bench isolation, SD reformat) were each declared on a
-  quiet window shorter than this bar and later withdrawn. Update this section (and the
-  Status line at the top) once the 8h mark is confirmed crossed by instrument, not by
-  elapsed wall-clock time alone.
+- Single boot at 2026-08-29 01:11:02, **zero reboots for the entire window** — one
+  continuous run, not gaps stitched together
+- **2026-08-29 09:11:49 IST — 480.7 min (8.01h) uptime, 0 fault logs, 0 reboots.**
+  8h pass bar cleared. Real load running throughout (uXRCE-DDS, EKF2, camera, `/scan`,
+  `/scan_3d`, wheel odometry all up), `throttled=0x0`, ~51°C. SD-card fault baseline
+  was 0 at soak start and stayed 0.
+- **Why 8h is not an arbitrary number:** derived from the fault era's own measured
+  distribution over 38 usable inter-fault gaps — median 5.4 min, p90 73 min, longest
+  quiet gap ever observed while the bug was present 7.3h, **P(quiet ≥8h | bug still
+  present) = 0.0%**. This soak window falls outside anything the bug itself ever
+  produced. Three earlier "fixes" in this campaign (charger, USB bench isolation, SD
+  reformat) were each declared on a quiet window shorter than this bar and later
+  withdrawn — this is why the bar is held to strictly.
+
+### What's still open
+
+Two things this soak result does **not** settle, kept explicitly open rather than
+folded into "RESOLVED":
+
+1. **Direct register evidence of the calibration is still unread.** The MCU-Link probe
+   on the companion's board is physically unplugged, so the live `g_dll_cal` value
+   (symbol address `0x20252774` in this build) hasn't been compared against the ROM
+   baseline (`DLLCR=0x00400079`, `STS2=0x00000b33` → `ASLVSEL=12, AREFSEL=11`). The 8h
+   clean soak is strong behavioral evidence the fix works; this register read would be
+   the direct mechanism proof. Pending the probe being reseated.
+2. **The uXRCE-DDS null-deref bug (below) is untouched by this result.** It fires at a
+   much lower rate than the DLL-related faults did, so a clean 8h window is not
+   meaningful evidence either way for it. Track it separately.
 
 ## Known gap: not yet in any v1.18 upstream tag
 
