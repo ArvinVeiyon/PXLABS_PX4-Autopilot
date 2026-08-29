@@ -28,7 +28,12 @@ PXLABS uses two parallel tag schemes:
 |------------|---------|---------|
 | `pxlabs-v<px4>-r<N>[-Beta]` | `pxlabs-v1.17.0-r2-Beta` | Internal PXLABS release identifier |
 | `v<px4>-<major>.<minor>.<patch>` | `v1.17.0-2.0.0` | QGC-parseable tag — controls **Custom Fw. Ver.** display |
-| `<px4>.<major>.<minor>.<patch>` | `1.17.0.2.0` | Numeric release reference tag |
+
+> A third scheme, a plain numeric alias tag (`<px4>.<major>.<minor>.<patch>`, e.g.
+> `1.17.0.2.0`), was used through the v2.0.0 release but discontinued as of v2.1.0 —
+> it was redundant with the `v<px4>-<major>.<minor>.<patch>` tag above and added no
+> information. Existing `1.17.0.2.0` etc. tags from before v2.1.0 are left in place as
+> history; no new numeric-alias tags will be created going forward.
 
 > **How QGC version display works:** PX4's cmake picks up the nearest `v*` git tag at configure time and bakes it into the firmware. QGC reads the custom version part (after `v1.17.0-`) and displays it as **Custom Fw. Ver.**
 > - Tag `v1.17.0-2.0.0` → QGC shows `2.0.0`
@@ -43,10 +48,9 @@ PXLABS uses two parallel tag schemes:
 | `pxlabs-v1.17.0-r1` | Branch + Tag | Stable release 1 — hardware verified 2026-05-24 |
 | `pxlabs-v1.17.0-r2-Beta` | Tag | Beta release 2 — esc_status DDS, tested 2026-05-29 |
 | `v1.17.0-2.1.0` | Tag | **Latest release** — QGC shows `2.1.0` (2026-08-29) |
-| `1.17.0.2.1` | Tag | Numeric alias for release 2.1.0 |
 | `pxlabs-v1.17.0-2.1.0` | Branch | Release branch for v2.1.0 |
 | `v1.17.0-2.0.0` | Tag | Previous release — QGC shows `2.0.0` (2026-05-31) |
-| `1.17.0.2.0` | Tag | Numeric alias for release 2.0.0 |
+| `1.17.0.2.0` | Tag | Numeric alias for release 2.0.0 (legacy scheme, discontinued as of v2.1.0) |
 | `pxlabs-v1.17.0-2.0.0` | Branch | Release branch for v2.0.0 |
 | `pxlabs-v1.17.0-dev` | Branch | Active development for next release |
 | `pxlabs-v1.16.1-r1` | Branch + Tag | Previous stable (PX4 v1.16.1 based) |
