@@ -172,7 +172,7 @@ pxlabs/
 │   ├── bootloader_update_v6xrt.md
 │   └── Burning fuses on RT7.pdf
 ├── Parameters/
-│   └── PXlabs_Differential_Rover_NXP_tested_2026-05-24.params
+│   └── PXlabs_Differential_Rover_NXP_<status>_<YYYY-MM-DD>.params  (see Parameters table)
 ├── NXP_Bootloader/
 │   └── px4_fmu-v6xrt_bootloader.bin
 ├── PXLabs_Bootloader/
@@ -192,6 +192,10 @@ pxlabs/
 
 | File | Vehicle | Status | Date |
 |------|---------|--------|------|
+| [`PXlabs_Differential_Rover_NXP_tested_2026-10-24.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-10-24.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ — current baseline | 2026-10-24 |
+| [`PXlabs_Differential_Rover_NXP_tested_2026-10-20.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-10-20.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-10-20 |
+| [`PXlabs_Differential_Rover_NXP_hard-fault_2026-08-22.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_hard-fault_2026-08-22.params) | Differential Rover — NXP FMU-V6XRT | Captured after hard fault — reference only, not a working config | 2026-08-22 |
+| [`PXlabs_Differential_Rover_NXP_tested_2026-08-15.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-08-15.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-08-15 |
 | [`PXlabs_Differential_Rover_NXP_tested_2026-05-29.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-05-29.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-05-29 |
 | [`PXlabs_Differential_Rover_NXP_tested_2026-05-24.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-05-24.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-05-24 |
 
