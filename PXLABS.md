@@ -192,6 +192,7 @@ pxlabs/
 
 | File | Vehicle | Status | Date |
 |------|---------|--------|------|
+| [`PXlabs_Differential_Rover_NXP_candidate_2026-11-13.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_candidate_2026-11-13.params) | Differential Rover — NXP FMU-V6XRT | Candidate — not yet tested (prepared for 14 Dec run) | 2026-11-13 |
 | [`PXlabs_Differential_Rover_NXP_tested_2026-10-24.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-10-24.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ — current baseline | 2026-10-24 |
 | [`PXlabs_Differential_Rover_NXP_tested_2026-10-20.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_tested_2026-10-20.params) | Differential Rover — NXP FMU-V6XRT | Tested ✓ | 2026-10-20 |
 | [`PXlabs_Differential_Rover_NXP_hard-fault_2026-08-22.params`](pxlabs/Parameters/PXlabs_Differential_Rover_NXP_hard-fault_2026-08-22.params) | Differential Rover — NXP FMU-V6XRT | Captured after hard fault — reference only, not a working config | 2026-08-22 |
